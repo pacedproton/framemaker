@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Slate } from 'slate-react';
 import { createEditor } from 'slate';
 import { withHistory } from 'slate-history';
@@ -15,6 +15,11 @@ import VariablesPanel from './components/Panels/VariablesPanel';
 import ConditionsPanel from './components/Panels/ConditionsPanel';
 import IndexPanel from './components/Panels/IndexPanel';
 import StatusBar from './components/StatusBar';
+
+// Frame-based components
+import FrameCanvas from './components/FrameCanvas/FrameCanvas';
+import FrameToolbar from './components/FrameCanvas/FrameToolbar';
+import './components/FrameCanvas/FrameCanvas.css';
 
 // Dialogs
 import InsertTableDialog from './components/Dialogs/InsertTableDialog';
@@ -33,6 +38,8 @@ function App() {
     zoom,
     viewMode,
   } = useDocumentStore();
+
+  const [editorMode, setEditorMode] = useState<'text' | 'frame'>('frame');
 
   // Create new document on first load
   useEffect(() => {
@@ -89,110 +96,134 @@ function App() {
       <MenuBar />
       <MainToolbar />
 
-      <div className="main-content">
-        <div className="sidebar left-sidebar">
-          <div className="panel-tabs">
-            <button
-              className={`panel-tab ${activePanel === 'structure' ? 'active' : ''}`}
-              onClick={() => setActivePanel('structure')}
-              title="Document Structure"
-            >
-              Structure
-            </button>
-            <button
-              className={`panel-tab ${activePanel === 'styles' ? 'active' : ''}`}
-              onClick={() => setActivePanel('styles')}
-              title="Styles"
-            >
-              Styles
-            </button>
-            <button
-              className={`panel-tab ${activePanel === 'variables' ? 'active' : ''}`}
-              onClick={() => setActivePanel('variables')}
-              title="Variables"
-            >
-              Variables
-            </button>
-            <button
-              className={`panel-tab ${activePanel === 'conditions' ? 'active' : ''}`}
-              onClick={() => setActivePanel('conditions')}
-              title="Conditions"
-            >
-              Conditions
-            </button>
-            <button
-              className={`panel-tab ${activePanel === 'index' ? 'active' : ''}`}
-              onClick={() => setActivePanel('index')}
-              title="Index"
-            >
-              Index
-            </button>
-          </div>
-          {renderActivePanel()}
-        </div>
-
-        <div className="editor-area">
-          <FormatToolbarWrapper />
-          <div
-            className={`document-canvas view-${viewMode}`}
-            style={editorStyle}
-          >
-            <div className="page">
-              <RichTextEditor />
-            </div>
-          </div>
-        </div>
-
-        <div className="sidebar right-sidebar">
-          <div className="properties-panel">
-            <div className="panel-header">
-              <h3>Properties</h3>
-            </div>
-            <div className="panel-content">
-              {currentDocument ? (
-                <>
-                  <div className="property-group">
-                    <h4>Document Info</h4>
-                    <div className="property-item">
-                      <label>Title:</label>
-                      <span>{currentDocument.metadata.title}</span>
-                    </div>
-                    <div className="property-item">
-                      <label>Author:</label>
-                      <span>{currentDocument.metadata.author || 'Not set'}</span>
-                    </div>
-                    <div className="property-item">
-                      <label>Version:</label>
-                      <span>{currentDocument.metadata.version}</span>
-                    </div>
-                    <div className="property-item">
-                      <label>Language:</label>
-                      <span>{currentDocument.metadata.language}</span>
-                    </div>
-                  </div>
-                  <div className="property-group">
-                    <h4>Page Setup</h4>
-                    <div className="property-item">
-                      <label>Master Page:</label>
-                      <span>{currentDocument.masterPages[0]?.name || 'Default'}</span>
-                    </div>
-                    <div className="property-item">
-                      <label>Page Size:</label>
-                      <span>Letter (8.5" × 11")</span>
-                    </div>
-                    <div className="property-item">
-                      <label>Margins:</label>
-                      <span>1" all sides</span>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <p>No document selected</p>
-              )}
-            </div>
-          </div>
-        </div>
+      <div className="mode-switcher">
+        <button
+          className={`mode-button ${editorMode === 'frame' ? 'active' : ''}`}
+          onClick={() => setEditorMode('frame')}
+        >
+          Frame Layout
+        </button>
+        <button
+          className={`mode-button ${editorMode === 'text' ? 'active' : ''}`}
+          onClick={() => setEditorMode('text')}
+        >
+          Text Editor
+        </button>
       </div>
+
+      {editorMode === 'frame' ? (
+        <>
+          <FrameToolbar />
+          <div className="main-content frame-mode">
+            <FrameCanvas />
+          </div>
+        </>
+      ) : (
+        <div className="main-content">
+          <div className="sidebar left-sidebar">
+            <div className="panel-tabs">
+              <button
+                className={`panel-tab ${activePanel === 'structure' ? 'active' : ''}`}
+                onClick={() => setActivePanel('structure')}
+                title="Document Structure"
+              >
+                Structure
+              </button>
+              <button
+                className={`panel-tab ${activePanel === 'styles' ? 'active' : ''}`}
+                onClick={() => setActivePanel('styles')}
+                title="Styles"
+              >
+                Styles
+              </button>
+              <button
+                className={`panel-tab ${activePanel === 'variables' ? 'active' : ''}`}
+                onClick={() => setActivePanel('variables')}
+                title="Variables"
+              >
+                Variables
+              </button>
+              <button
+                className={`panel-tab ${activePanel === 'conditions' ? 'active' : ''}`}
+                onClick={() => setActivePanel('conditions')}
+                title="Conditions"
+              >
+                Conditions
+              </button>
+              <button
+                className={`panel-tab ${activePanel === 'index' ? 'active' : ''}`}
+                onClick={() => setActivePanel('index')}
+                title="Index"
+              >
+                Index
+              </button>
+            </div>
+            {renderActivePanel()}
+          </div>
+
+          <div className="editor-area">
+            <FormatToolbarWrapper />
+            <div
+              className={`document-canvas view-${viewMode}`}
+              style={editorStyle}
+            >
+              <div className="page">
+                <RichTextEditor />
+              </div>
+            </div>
+          </div>
+
+          <div className="sidebar right-sidebar">
+            <div className="properties-panel">
+              <div className="panel-header">
+                <h3>Properties</h3>
+              </div>
+              <div className="panel-content">
+                {currentDocument ? (
+                  <>
+                    <div className="property-group">
+                      <h4>Document Info</h4>
+                      <div className="property-item">
+                        <label>Title:</label>
+                        <span>{currentDocument.metadata.title}</span>
+                      </div>
+                      <div className="property-item">
+                        <label>Author:</label>
+                        <span>{currentDocument.metadata.author || 'Not set'}</span>
+                      </div>
+                      <div className="property-item">
+                        <label>Version:</label>
+                        <span>{currentDocument.metadata.version}</span>
+                      </div>
+                      <div className="property-item">
+                        <label>Language:</label>
+                        <span>{currentDocument.metadata.language}</span>
+                      </div>
+                    </div>
+                    <div className="property-group">
+                      <h4>Page Setup</h4>
+                      <div className="property-item">
+                        <label>Master Page:</label>
+                        <span>{currentDocument.masterPages[0]?.name || 'Default'}</span>
+                      </div>
+                      <div className="property-item">
+                        <label>Page Size:</label>
+                        <span>Letter (8.5" × 11")</span>
+                      </div>
+                      <div className="property-item">
+                        <label>Margins:</label>
+                        <span>1" all sides</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p>No document selected</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <StatusBar />
 
