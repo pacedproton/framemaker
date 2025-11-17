@@ -10,6 +10,7 @@ import { StatusBar } from './ui/StatusBar';
 import { PageRenderer } from './render/PageRenderer';
 import { ToolPalette } from './ui/ToolPalette';
 import { EquationDialog } from './ui/EquationDialog';
+import { TableDialog } from './ui/TableDialog';
 import {
   createDrawingState,
   startDrawing,
@@ -28,12 +29,18 @@ function App() {
   const [drawState, setDrawState] = useState(createDrawingState());
   const [showToolPalette, setShowToolPalette] = useState(false);
   const [showEquationDialog, setShowEquationDialog] = useState(false);
+  const [showTableDialog, setShowTableDialog] = useState(false);
 
   // Listen for custom events
   useEffect(() => {
     const handleToggleToolPalette = () => setShowToolPalette((v) => !v);
+    const handleShowTableDialog = () => setShowTableDialog(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
-    return () => window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
+    window.addEventListener('showTableDialog', handleShowTableDialog);
+    return () => {
+      window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
+      window.removeEventListener('showTableDialog', handleShowTableDialog);
+    };
   }, []);
 
   // Handle keyboard shortcuts
@@ -147,6 +154,14 @@ function App() {
     setShowEquationDialog(false);
   };
 
+  const handleTableInsert = (rows: number, cols: number, title: string) => {
+    // Insert table inline
+    if (state.editingFrameId) {
+      store.insertTable(rows, cols, title);
+    }
+    setShowTableDialog(false);
+  };
+
   return (
     <div className="fm-app">
       <MenuBar />
@@ -211,6 +226,11 @@ function App() {
         visible={showEquationDialog}
         onClose={() => setShowEquationDialog(false)}
         onInsert={handleEquationInsert}
+      />
+      <TableDialog
+        visible={showTableDialog}
+        onClose={() => setShowTableDialog(false)}
+        onInsert={handleTableInsert}
       />
     </div>
   );

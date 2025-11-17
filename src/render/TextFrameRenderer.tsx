@@ -5,6 +5,8 @@ import { store, useStore } from '../document/store';
 import { defaultParagraphProperties } from '../document/types';
 import { parseSimpleEquation } from '../engine/EquationEditor';
 import { EquationRenderer } from './EquationRenderer';
+import { TableRenderer } from './TableRenderer';
+import type { Table } from '../engine/TableEngine';
 
 interface TextFrameRendererProps {
   frame: TextFrame;
@@ -309,6 +311,35 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
               style={{ color: '#ef4444', fontStyle: 'italic' }}
             >
               [Invalid Equation]
+            </span>
+          );
+        }
+      }
+
+      // Render table inline
+      if ('type' in elem && elem.type === 'table') {
+        try {
+          const tableData = JSON.parse(elem.tableData) as Table;
+          return (
+            <div
+              key={elem.id}
+              className="fm-table-inline"
+              style={{
+                display: 'block',
+                margin: '8px 0',
+              }}
+            >
+              <TableRenderer table={tableData} />
+            </div>
+          );
+        } catch {
+          return (
+            <span
+              key={elem.id}
+              className="fm-table-error"
+              style={{ color: '#ef4444', fontStyle: 'italic' }}
+            >
+              [Invalid Table]
             </span>
           );
         }

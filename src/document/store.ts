@@ -1,8 +1,9 @@
 // Document store - central state management
 import { useState, useEffect } from 'react';
-import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline } from './types';
+import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline, TableInline } from './types';
 import { createInitialEditorState, createPage, createParagraph, createTextRun } from './factory';
 import { generateId } from './types';
+import { createTable } from '../engine/TableEngine';
 
 type Listener = () => void;
 
@@ -488,6 +489,37 @@ class DocumentStore {
 
       // Cursor is at end, append equation
       para.content.push(eqElement);
+      state.cursor!.offset += 1;
+    }, true);
+  }
+
+  // Table insertion
+  insertTable(rows: number, cols: number, title: string = ''): void {
+    if (!this.state.editingFrameId || !this.state.cursor) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (!para) return;
+
+      // Create table structure
+      const table = createTable(rows, cols);
+      if (title) {
+        table.title = title;
+        table.titlePosition = 'above';
+      }
+
+      // Create table inline element
+      const tableElement: TableInline = {
+        type: 'table',
+        id: generateId('tbl'),
+        tableData: JSON.stringify(table),
+      };
+
+      // Insert table as block element (at end of current paragraph content)
+      para.content.push(tableElement);
       state.cursor!.offset += 1;
     }, true);
   }

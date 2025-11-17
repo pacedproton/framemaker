@@ -94,8 +94,15 @@ export interface EquationInline {
   fontSize: number;
 }
 
+// Table inline element (embedded table in text flow)
+export interface TableInline {
+  type: 'table';
+  id: string;
+  tableData: string; // JSON serialized table structure
+}
+
 // Inline element
-export type InlineElement = TextRun | AnchorMarker | EquationInline;
+export type InlineElement = TextRun | AnchorMarker | EquationInline | TableInline;
 
 // Paragraph
 export interface Paragraph {

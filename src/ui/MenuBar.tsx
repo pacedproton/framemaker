@@ -189,11 +189,7 @@ export const MenuBar: React.FC = () => {
     {
       label: 'Insert Table...',
       action: () => {
-        const rows = parseInt(prompt('Number of rows:', '3') || '3');
-        const cols = parseInt(prompt('Number of columns:', '3') || '3');
-        if (rows > 0 && cols > 0) {
-          alert(`Table ${rows}x${cols} would be inserted here`);
-        }
+        window.dispatchEvent(new CustomEvent('showTableDialog'));
       },
     },
     { separator: true },
