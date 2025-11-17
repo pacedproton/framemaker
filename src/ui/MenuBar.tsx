@@ -79,6 +79,21 @@ export const Menu: React.FC<MenuProps> = ({ label, items }) => {
   );
 };
 
+// Application Title Bar - classic Windows style
+export const AppTitleBar: React.FC = () => {
+  return (
+    <div className="fm-app-titlebar">
+      <div className="titlebar-icon">FM</div>
+      <div className="titlebar-title">FrameMaker Web</div>
+      <div className="titlebar-buttons">
+        <button className="titlebar-btn minimize" title="Minimize">_</button>
+        <button className="titlebar-btn maximize" title="Maximize">□</button>
+        <button className="titlebar-btn close" title="Close">×</button>
+      </div>
+    </div>
+  );
+};
+
 // Complete menu bar with all menus
 export const MenuBar: React.FC = () => {
   const fileMenuItems: MenuItem[] = [
@@ -112,7 +127,11 @@ export const MenuBar: React.FC = () => {
   ];
 
   const formatMenuItems: MenuItem[] = [
-    { label: 'Characters...', shortcut: 'Ctrl+D', disabled: true },
+    {
+      label: 'Characters...',
+      shortcut: 'Ctrl+D',
+      action: () => window.dispatchEvent(new CustomEvent('showCharacterDialog')),
+    },
     { label: 'Paragraphs...', shortcut: 'Ctrl+M', disabled: true },
     { separator: true },
     { label: 'Style', disabled: true },

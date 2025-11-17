@@ -20,6 +20,67 @@ body {
   width: 100vw;
 }
 
+/* Application Title Bar - Classic Windows 95 style */
+.fm-app-titlebar {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  padding: 2px 4px;
+  min-height: 24px;
+  font-size: 12px;
+  font-weight: bold;
+  user-select: none;
+}
+
+.titlebar-icon {
+  background: #c0c0c0;
+  color: #000080;
+  padding: 2px 4px;
+  font-size: 10px;
+  font-weight: bold;
+  margin-right: 6px;
+  border: 1px solid #808080;
+}
+
+.titlebar-title {
+  flex: 1;
+}
+
+.titlebar-buttons {
+  display: flex;
+  gap: 2px;
+}
+
+.titlebar-btn {
+  width: 18px;
+  height: 16px;
+  background: #c0c0c0;
+  border: 1px outset #ffffff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  padding: 0;
+  line-height: 1;
+}
+
+.titlebar-btn:hover {
+  background: #d0d0d0;
+}
+
+.titlebar-btn:active {
+  border-style: inset;
+}
+
+.titlebar-btn.close:hover {
+  background: #ff6060;
+  color: white;
+}
+
 /* Menu Bar - Classic FrameMaker style */
 .fm-menu-bar {
   display: flex;
@@ -143,6 +204,69 @@ body {
 .toolbar-btn.active {
   background: #a0a0a0;
   border-style: inset;
+}
+
+/* Icon-based toolbar buttons */
+.toolbar-btn.icon-btn {
+  width: 28px;
+  height: 26px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-btn.icon-btn.small {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+
+.btn-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.toolbar-btn.tool-btn {
+  min-width: auto;
+  padding: 3px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-btn.tool-btn .btn-icon {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.toolbar-btn.tool-btn .btn-label {
+  font-size: 10px;
+}
+
+.toolbar-btn.toggle-btn {
+  width: 26px;
+  height: 24px;
+  padding: 2px;
+}
+
+.toolbar-btn.toggle-btn .btn-icon {
+  font-size: 14px;
+}
+
+/* Zoom controls */
+.zoom-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.zoom-select {
+  padding: 2px 4px;
+  font-size: 11px;
+  border: 1px inset #ffffff;
+  background: white;
+  min-width: 60px;
 }
 
 .toolbar-checkbox {
@@ -906,4 +1030,486 @@ body {
 
 .fm-table-preview table {
   margin: 0 auto;
+}
+
+/* Main Area Layout */
+.fm-main-area {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.fm-workspace {
+  flex: 1;
+}
+
+/* Properties Panel */
+.fm-properties-panel {
+  width: 240px;
+  background: linear-gradient(to bottom, #e8e4dc 0%, #d4d0c8 100%);
+  border-left: 1px solid #808080;
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: linear-gradient(to bottom, #000080, #0000a0);
+  color: white;
+  font-weight: bold;
+}
+
+.panel-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.prop-section {
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid #808080;
+  padding: 8px;
+}
+
+.prop-section-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #c0c0c0;
+  color: #000080;
+}
+
+.prop-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 4px;
+}
+
+.prop-row label {
+  flex: 0 0 70px;
+  font-size: 10px;
+  color: #404040;
+}
+
+.prop-value {
+  font-size: 10px;
+  color: #000;
+}
+
+.prop-input {
+  flex: 1;
+  padding: 2px 4px;
+  border: 1px solid #808080;
+  background: white;
+  font-size: 10px;
+}
+
+.prop-input.small {
+  width: 50px;
+  flex: 0 0 50px;
+}
+
+.prop-coords {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.prop-row.checkbox {
+  gap: 6px;
+}
+
+.prop-row.checkbox label {
+  flex: none;
+}
+
+.zoom-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zoom-control button {
+  width: 24px;
+  height: 20px;
+  border: 1px outset #ffffff;
+  background: #d4d0c8;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.zoom-control button:active {
+  border-style: inset;
+}
+
+.zoom-value {
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Bottom Bar */
+.fm-bottom-bar {
+  display: flex;
+  background: linear-gradient(to bottom, #d4d0c8 0%, #c0c0c0 100%);
+  border-top: 1px solid #808080;
+  min-height: 28px;
+}
+
+/* Page Navigator */
+.fm-page-navigator {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 4px;
+  border-right: 1px solid #808080;
+}
+
+.nav-btn {
+  width: 24px;
+  height: 20px;
+  border: 1px outset #ffffff;
+  background: #d4d0c8;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.nav-btn:active:not(:disabled) {
+  border-style: inset;
+}
+
+.nav-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.nav-btn.add {
+  background: #90c090;
+  font-weight: bold;
+}
+
+.page-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-input {
+  width: 40px;
+  text-align: center;
+  border: 1px solid #808080;
+  padding: 2px;
+  font-size: 11px;
+}
+
+.page-total {
+  font-size: 11px;
+  color: #404040;
+}
+
+/* Enhanced Status Bar */
+.fm-status-bar {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  font-size: 10px;
+  background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
+  border-top: 1px solid #ffffff;
+}
+
+.status-section {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-right: 1px solid #a0a0a0;
+  gap: 8px;
+}
+
+.status-section:last-child {
+  border-right: none;
+}
+
+.status-section.mode-section {
+  gap: 4px;
+}
+
+.status-section.timestamp {
+  margin-left: auto;
+  border-right: none;
+  border-left: 1px solid #a0a0a0;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.status-cell.tool-cell {
+  min-width: 100px;
+}
+
+.status-label {
+  color: #606060;
+  font-size: 9px;
+}
+
+.status-value {
+  color: #000000;
+  font-weight: 500;
+}
+
+.status-value.tag {
+  background: #e0e0e0;
+  padding: 1px 4px;
+  border: 1px solid #a0a0a0;
+  font-family: monospace;
+  font-size: 9px;
+}
+
+.status-value.muted {
+  color: #808080;
+  font-style: italic;
+}
+
+.status-indicator {
+  background: #404040;
+  color: white;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.status-indicator.editing {
+  background: #008000;
+}
+
+.status-indicator:empty {
+  display: none;
+}
+
+.status-cell.selected-cell .status-value {
+  color: #0066cc;
+  font-weight: bold;
+}
+
+.status-left,
+.status-center,
+.status-right {
+  display: flex;
+  gap: 12px;
+}
+
+.status-item {
+  color: #404040;
+}
+
+.status-item.editing {
+  color: #008000;
+  font-weight: bold;
+}
+
+.status-item.tool-indicator {
+  color: #000080;
+  font-weight: bold;
+}
+
+.status-item.zoom {
+  font-weight: bold;
+}
+
+.status-item.modified {
+  font-size: 10px;
+  color: #606060;
+}
+
+/* Format button active state */
+.format-btn.active {
+  background: #808080;
+  border-style: inset;
+  color: white;
+}
+
+/* Improved Dialog Styles */
+.fm-dialog {
+  background: #d4d0c8;
+  border: 2px outset #ffffff;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.4);
+  min-width: 320px;
+}
+
+.dialog-title {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: white;
+  padding: 4px 8px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.dialog-content {
+  padding: 12px;
+  background: #d4d0c8;
+}
+
+.dialog-buttons {
+  padding: 8px 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid #808080;
+}
+
+.dialog-buttons button {
+  padding: 4px 16px;
+  border: 2px outset #ffffff;
+  background: #d4d0c8;
+  cursor: pointer;
+  font-size: 11px;
+  min-width: 70px;
+}
+
+.dialog-buttons button:hover {
+  background: #e0e0e0;
+}
+
+.dialog-buttons button:active {
+  border-style: inset;
+}
+
+/* Character Dialog Styles */
+.character-dialog {
+  min-width: 450px;
+}
+
+.char-section {
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid #808080;
+  padding: 8px;
+}
+
+.char-section .section-header {
+  font-weight: bold;
+  font-size: 11px;
+  color: #000080;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #c0c0c0;
+}
+
+.char-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.char-row label {
+  min-width: 60px;
+  font-size: 11px;
+  color: #404040;
+}
+
+.char-row select,
+.char-row input[type="number"] {
+  flex: 1;
+  padding: 2px 4px;
+  border: 1px solid #808080;
+  background: white;
+  font-size: 11px;
+}
+
+.char-row .unit {
+  font-size: 10px;
+  color: #606060;
+  min-width: 50px;
+}
+
+.char-row .color-picker {
+  width: 30px;
+  height: 22px;
+  border: 1px solid #808080;
+  padding: 0;
+}
+
+.char-row .color-value {
+  font-family: monospace;
+  font-size: 10px;
+  color: #404040;
+}
+
+.char-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.char-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.char-radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.char-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.char-preview {
+  margin-top: 12px;
+  background: white;
+  border: 1px solid #808080;
+  padding: 8px;
+}
+
+.char-preview .preview-label {
+  font-size: 10px;
+  font-weight: bold;
+  color: #404040;
+  margin-bottom: 6px;
+}
+
+.char-preview .preview-text {
+  padding: 8px;
+  background: #fafafa;
+  border: 1px inset #ffffff;
+  min-height: 30px;
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }

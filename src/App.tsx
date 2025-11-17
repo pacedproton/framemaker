@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
 import { useStore, store } from './document/store';
-import { MenuBar } from './ui/MenuBar';
+import { MenuBar, AppTitleBar } from './ui/MenuBar';
 import { MainToolbar } from './ui/toolbars/MainToolbar';
 import { FormatToolbar } from './ui/toolbars/FormatToolbar';
 import { Ruler, RulerCorner } from './ui/Ruler';
@@ -12,6 +12,9 @@ import { ToolPalette } from './ui/ToolPalette';
 import { EquationDialog } from './ui/EquationDialog';
 import { TableDialog } from './ui/TableDialog';
 import { ImageDialog } from './ui/ImageDialog';
+import { CharacterDialog } from './ui/CharacterDialog';
+import { PropertiesPanel } from './ui/PropertiesPanel';
+import { PageNavigator } from './ui/PageNavigator';
 import {
   createDrawingState,
   startDrawing,
@@ -32,19 +35,24 @@ function App() {
   const [showEquationDialog, setShowEquationDialog] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
+  const [showCharacterDialog, setShowCharacterDialog] = useState(false);
+  const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
 
   // Listen for custom events
   useEffect(() => {
     const handleToggleToolPalette = () => setShowToolPalette((v) => !v);
     const handleShowTableDialog = () => setShowTableDialog(true);
     const handleShowImageDialog = () => setShowImageDialog(true);
+    const handleShowCharacterDialog = () => setShowCharacterDialog(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
     window.addEventListener('showImageDialog', handleShowImageDialog);
+    window.addEventListener('showCharacterDialog', handleShowCharacterDialog);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
       window.removeEventListener('showImageDialog', handleShowImageDialog);
+      window.removeEventListener('showCharacterDialog', handleShowCharacterDialog);
     };
   }, []);
 
@@ -93,6 +101,12 @@ function App() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
         e.preventDefault();
         setShowEquationDialog(true);
+      }
+
+      // Toggle properties panel
+      if (e.key === 'F7') {
+        e.preventDefault();
+        setShowPropertiesPanel((v) => !v);
       }
 
       // Delete selected frame
@@ -175,59 +189,68 @@ function App() {
 
   return (
     <div className="fm-app">
+      <AppTitleBar />
       <MenuBar />
 
       <MainToolbar />
       <FormatToolbar />
 
-      <div className="fm-workspace">
-        <RulerCorner />
-        <Ruler orientation="horizontal" />
+      <div className="fm-main-area">
+        <div className="fm-workspace">
+          <RulerCorner />
+          <Ruler orientation="horizontal" />
 
-        <Ruler orientation="vertical" />
+          <Ruler orientation="vertical" />
 
-        <div className="fm-canvas-container">
-          <div
-            ref={canvasRef}
-            className="fm-canvas"
-            onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
-            onMouseUp={handleCanvasMouseUp}
-            onMouseLeave={handleCanvasMouseUp}
-          >
+          <div className="fm-canvas-container">
             <div
-              className="fm-canvas-scaler"
-              style={{
-                transform: `scale(${scale})`,
-                transformOrigin: 'top left',
-              }}
+              ref={canvasRef}
+              className="fm-canvas"
+              onMouseDown={handleCanvasMouseDown}
+              onMouseMove={handleCanvasMouseMove}
+              onMouseUp={handleCanvasMouseUp}
+              onMouseLeave={handleCanvasMouseUp}
             >
-              <div className="fm-pasteboard">
-                <PageRenderer page={currentPage} scale={1} />
+              <div
+                className="fm-canvas-scaler"
+                style={{
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                }}
+              >
+                <div className="fm-pasteboard">
+                  <PageRenderer page={currentPage} scale={1} />
 
-                {/* Drawing preview */}
-                {drawingRect && (
-                  <div
-                    className="fm-drawing-preview"
-                    style={{
-                      position: 'absolute',
-                      left: `${drawingRect.x}px`,
-                      top: `${drawingRect.y}px`,
-                      width: `${drawingRect.width}px`,
-                      height: `${drawingRect.height}px`,
-                      border: '2px dashed #2563eb',
-                      backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                )}
+                  {/* Drawing preview */}
+                  {drawingRect && (
+                    <div
+                      className="fm-drawing-preview"
+                      style={{
+                        position: 'absolute',
+                        left: `${drawingRect.x}px`,
+                        top: `${drawingRect.y}px`,
+                        width: `${drawingRect.width}px`,
+                        height: `${drawingRect.height}px`,
+                        border: '2px dashed #2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Properties Panel */}
+        {showPropertiesPanel && <PropertiesPanel />}
       </div>
 
-      <StatusBar />
+      <div className="fm-bottom-bar">
+        <PageNavigator />
+        <StatusBar />
+      </div>
 
       {/* Floating Palettes */}
       <ToolPalette visible={showToolPalette} onClose={() => setShowToolPalette(false)} />
@@ -247,6 +270,10 @@ function App() {
         visible={showImageDialog}
         onClose={() => setShowImageDialog(false)}
         onInsert={handleImageInsert}
+      />
+      <CharacterDialog
+        visible={showCharacterDialog}
+        onClose={() => setShowCharacterDialog(false)}
       />
     </div>
   );
