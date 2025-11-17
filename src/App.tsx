@@ -2,11 +2,14 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
 import { useStore, store } from './document/store';
+import { MenuBar } from './ui/MenuBar';
 import { MainToolbar } from './ui/toolbars/MainToolbar';
 import { FormatToolbar } from './ui/toolbars/FormatToolbar';
 import { Ruler, RulerCorner } from './ui/Ruler';
 import { StatusBar } from './ui/StatusBar';
 import { PageRenderer } from './render/PageRenderer';
+import { ToolPalette } from './ui/ToolPalette';
+import { EquationDialog } from './ui/EquationDialog';
 import {
   createDrawingState,
   startDrawing,
@@ -23,6 +26,15 @@ function App() {
   const scale = state.zoom / 100;
   const canvasRef = useRef<HTMLDivElement>(null);
   const [drawState, setDrawState] = useState(createDrawingState());
+  const [showToolPalette, setShowToolPalette] = useState(false);
+  const [showEquationDialog, setShowEquationDialog] = useState(false);
+
+  // Listen for custom events
+  useEffect(() => {
+    const handleToggleToolPalette = () => setShowToolPalette((v) => !v);
+    window.addEventListener('toggleToolPalette', handleToggleToolPalette);
+    return () => window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
+  }, []);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -64,11 +76,22 @@ function App() {
         e.preventDefault();
         store.redo();
       }
+
+      // Equation dialog
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        setShowEquationDialog(true);
+      }
+
+      // Delete selected frame
+      if (e.key === 'Delete' && state.selectedFrameIds.length > 0) {
+        state.selectedFrameIds.forEach((id) => store.deleteFrame(id));
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [state.editingFrameId, state.zoom]);
+  }, [state.editingFrameId, state.zoom, state.selectedFrameIds]);
 
   // Handle mouse events for frame drawing
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
@@ -76,8 +99,8 @@ function App() {
     if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left - 48) / scale; // -48 for pasteboard padding
-    const y = (e.clientY - rect.top - 48) / scale;
+    const x = (e.clientX - rect.left - 40) / scale; // -40 for pasteboard padding
+    const y = (e.clientY - rect.top - 40) / scale;
 
     setDrawState(startDrawing(drawState, x, y));
   };
@@ -87,8 +110,8 @@ function App() {
     if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left - 48) / scale;
-    const y = (e.clientY - rect.top - 48) / scale;
+    const x = (e.clientX - rect.left - 40) / scale;
+    const y = (e.clientY - rect.top - 40) / scale;
 
     setDrawState(updateDrawing(drawState, x, y));
   };
@@ -116,17 +139,17 @@ function App() {
 
   const drawingRect = getDrawingRect(drawState);
 
+  const handleEquationInsert = (latex: string) => {
+    // Insert equation as text for now
+    if (state.editingFrameId) {
+      store.insertText(`[EQ: ${latex}]`);
+    }
+    setShowEquationDialog(false);
+  };
+
   return (
     <div className="fm-app">
-      <header className="fm-menu-bar">
-        <div className="menu-item">File</div>
-        <div className="menu-item">Edit</div>
-        <div className="menu-item">Format</div>
-        <div className="menu-item">View</div>
-        <div className="menu-item">Special</div>
-        <div className="menu-item">Graphics</div>
-        <div className="menu-item">Table</div>
-      </header>
+      <MenuBar />
 
       <MainToolbar />
       <FormatToolbar />
@@ -179,6 +202,16 @@ function App() {
       </div>
 
       <StatusBar />
+
+      {/* Floating Palettes */}
+      <ToolPalette visible={showToolPalette} onClose={() => setShowToolPalette(false)} />
+
+      {/* Dialogs */}
+      <EquationDialog
+        visible={showEquationDialog}
+        onClose={() => setShowEquationDialog(false)}
+        onInsert={handleEquationInsert}
+      />
     </div>
   );
 }

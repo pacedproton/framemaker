@@ -25,20 +25,71 @@ body {
   display: flex;
   background: linear-gradient(to bottom, #d4d0c8 0%, #c8c4bc 100%);
   border-bottom: 1px solid #808080;
-  padding: 1px 4px;
+  padding: 0;
   min-height: 22px;
 }
 
-.menu-item {
+.fm-menu {
+  position: relative;
+}
+
+.menu-trigger {
   padding: 3px 10px;
   cursor: pointer;
   font-size: 12px;
   color: #000;
+  user-select: none;
 }
 
-.menu-item:hover {
+.menu-trigger:hover,
+.menu-trigger.active {
   background: #000080;
   color: white;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #d4d0c8;
+  border: 1px solid #808080;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+  z-index: 1000;
+}
+
+.menu-dropdown .menu-item {
+  padding: 4px 20px 4px 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.menu-dropdown .menu-item:hover:not(.disabled) {
+  background: #000080;
+  color: white;
+}
+
+.menu-dropdown .menu-item.disabled {
+  color: #808080;
+  cursor: default;
+}
+
+.menu-label {
+  flex: 1;
+}
+
+.menu-shortcut {
+  margin-left: 20px;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.menu-separator {
+  height: 1px;
+  background: #808080;
+  margin: 4px 0;
 }
 
 /* Main Toolbar */
@@ -380,4 +431,252 @@ body {
 /* Drawing Preview */
 .fm-drawing-preview {
   z-index: 1000;
+}
+
+/* Floating Tool Palette */
+.fm-tool-palette {
+  background: #d4d0c8;
+  border: 1px solid #808080;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+  min-width: 160px;
+  user-select: none;
+}
+
+.palette-title {
+  background: #000080;
+  color: white;
+  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+}
+
+.palette-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.palette-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.palette-content {
+  padding: 8px;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.palette-tool {
+  width: 28px;
+  height: 28px;
+  background: #e8e8e8;
+  border: 1px outset #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.palette-tool:hover {
+  background: #f0f0f0;
+}
+
+.palette-tool.active {
+  background: #a0a0a0;
+  border-style: inset;
+}
+
+.tool-section {
+  border-top: 1px solid #808080;
+  padding-top: 6px;
+  margin-top: 6px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.property-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.property-row label {
+  min-width: 40px;
+}
+
+.property-row input,
+.property-row select {
+  flex: 1;
+  font-size: 10px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+/* Dialog Overlay */
+.fm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.fm-dialog {
+  background: #d4d0c8;
+  border: 2px outset #ffffff;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 400px;
+  max-width: 600px;
+}
+
+.dialog-title {
+  background: #000080;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.dialog-content {
+  padding: 12px;
+}
+
+.dialog-buttons {
+  padding: 8px 12px;
+  border-top: 1px solid #808080;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog-buttons button {
+  padding: 4px 16px;
+  background: #d4d0c8;
+  border: 1px outset #ffffff;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.dialog-buttons button:hover {
+  background: #e8e8e8;
+}
+
+.dialog-buttons button:active {
+  border-style: inset;
+}
+
+/* Equation Dialog */
+.equation-templates {
+  margin-bottom: 12px;
+}
+
+.template-label,
+.symbol-label {
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.equation-templates button {
+  margin-right: 4px;
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  background: #e8e8e8;
+  border: 1px solid #808080;
+  cursor: pointer;
+}
+
+.equation-input {
+  margin-bottom: 12px;
+}
+
+.equation-input label {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.equation-input textarea {
+  width: 100%;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 6px;
+  border: 1px inset #ffffff;
+  background: white;
+}
+
+.equation-preview {
+  margin-bottom: 12px;
+}
+
+.equation-preview label {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.preview-box {
+  background: white;
+  border: 1px inset #ffffff;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 11px;
+  min-height: 40px;
+  word-break: break-all;
+}
+
+.equation-symbols {
+  margin-bottom: 8px;
+}
+
+.symbol-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.symbol-grid button {
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  background: #e8e8e8;
+  border: 1px solid #808080;
+  cursor: pointer;
+}
+
+.symbol-grid button:hover {
+  background: #f0f0f0;
 }
