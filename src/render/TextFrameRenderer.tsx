@@ -1,5 +1,5 @@
 // Text Frame Renderer - renders text frame with inline editing
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import type { TextFrame, Paragraph, CharacterProperties } from '../document/types';
 import { store, useStore } from '../document/store';
 import { defaultParagraphProperties } from '../document/types';
@@ -13,6 +13,11 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
   const state = useStore();
   const contentRef = useRef<HTMLDivElement>(null);
   const isEditing = state.editingFrameId === frame.id;
+  const isSelected = state.selectedFrameIds.includes(frame.id);
+
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, frameX: 0, frameY: 0 });
 
   // Get paragraph format from catalog
   const getParagraphFormat = useCallback(
@@ -23,12 +28,55 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
     [state.document.catalog.paragraphFormats]
   );
 
+  // Handle mouse down for dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (state.activeTool === 'select' && !isEditing) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Select this frame
+      store.selectFrame(frame.id);
+
+      // Start dragging
+      setIsDragging(true);
+      dragStart.current = {
+        x: e.clientX,
+        y: e.clientY,
+        frameX: frame.x,
+        frameY: frame.y,
+      };
+    }
+  };
+
+  // Handle mouse move for dragging
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const dx = (e.clientX - dragStart.current.x) / scale;
+      const dy = (e.clientY - dragStart.current.y) / scale;
+      store.moveFrame(frame.id, dragStart.current.frameX + dx, dragStart.current.frameY + dy);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, frame.id, scale]);
+
   // Handle click to start editing or select frame
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (state.activeTool === 'select') {
-      // In select mode, select the frame
+      // In select mode, just select (already handled by mousedown)
       store.selectFrame(frame.id);
     } else if (state.activeTool === 'text') {
       // In text mode, start editing
@@ -238,11 +286,16 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
     height: `${frame.height * scale}px`,
     transform: frame.rotation ? `rotate(${frame.rotation}deg)` : undefined,
     transformOrigin: 'center center',
-    border: state.showFrameBorders ? `${frame.strokeWidth}px solid ${frame.strokeColor}` : 'none',
+    border: state.showFrameBorders
+      ? `${frame.strokeWidth}px solid ${frame.strokeColor}`
+      : isSelected
+        ? '2px solid #0066ff'
+        : '1px solid #cccccc',
     backgroundColor: frame.fillColor === 'transparent' ? undefined : frame.fillColor,
     overflow: 'hidden',
-    cursor: isEditing ? 'text' : 'default',
+    cursor: isEditing ? 'text' : state.activeTool === 'select' ? 'move' : 'default',
     outline: isEditing ? '2px solid #2563eb' : 'none',
+    boxShadow: isSelected ? '0 0 0 1px #0066ff' : 'none',
   };
 
   const contentStyle: React.CSSProperties = {
@@ -257,8 +310,9 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
 
   return (
     <div
-      className={`fm-text-frame ${isEditing ? 'editing' : ''}`}
+      className={`fm-text-frame ${isEditing ? 'editing' : ''} ${isSelected ? 'selected' : ''}`}
       style={frameStyle}
+      onMouseDown={handleMouseDown}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
     >
