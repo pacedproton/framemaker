@@ -3,6 +3,8 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 import type { TextFrame, Paragraph, CharacterProperties } from '../document/types';
 import { store, useStore } from '../document/store';
 import { defaultParagraphProperties } from '../document/types';
+import { parseSimpleEquation } from '../engine/EquationEditor';
+import { EquationRenderer } from './EquationRenderer';
 
 interface TextFrameRendererProps {
   frame: TextFrame;
@@ -279,6 +281,39 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
           </span>
         );
       }
+
+      // Render equation inline
+      if ('type' in elem && elem.type === 'equation') {
+        try {
+          const ast = parseSimpleEquation(elem.latex);
+          return (
+            <span
+              key={elem.id}
+              className="fm-equation-inline"
+              style={{
+                display: 'inline-block',
+                verticalAlign: 'middle',
+                padding: '0 2px',
+                background: 'rgba(37, 99, 235, 0.05)',
+                borderRadius: '2px',
+              }}
+            >
+              <EquationRenderer equation={ast} fontSize={elem.fontSize} />
+            </span>
+          );
+        } catch {
+          return (
+            <span
+              key={elem.id}
+              className="fm-equation-error"
+              style={{ color: '#ef4444', fontStyle: 'italic' }}
+            >
+              [Invalid Equation]
+            </span>
+          );
+        }
+      }
+
       return null;
     });
   };

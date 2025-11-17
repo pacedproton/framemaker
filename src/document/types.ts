@@ -86,8 +86,16 @@ export interface AnchorMarker {
   frameId: string;
 }
 
+// Equation inline element
+export interface EquationInline {
+  type: 'equation';
+  id: string;
+  latex: string;
+  fontSize: number;
+}
+
 // Inline element
-export type InlineElement = TextRun | AnchorMarker;
+export type InlineElement = TextRun | AnchorMarker | EquationInline;
 
 // Paragraph
 export interface Paragraph {

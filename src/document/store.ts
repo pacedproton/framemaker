@@ -1,7 +1,8 @@
 // Document store - central state management
 import { useState, useEffect } from 'react';
-import type { EditorState, Page, Frame, TextFrame, Paragraph } from './types';
+import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline } from './types';
 import { createInitialEditorState, createPage, createParagraph, createTextRun } from './factory';
+import { generateId } from './types';
 
 type Listener = () => void;
 
@@ -433,6 +434,61 @@ class DocumentStore {
       if (para) {
         para.formatTag = tag;
       }
+    }, true);
+  }
+
+  // Equation insertion
+  insertEquation(latex: string, fontSize: number = 12): void {
+    if (!this.state.editingFrameId || !this.state.cursor) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (!para) return;
+
+      // Create equation inline element
+      const eqElement: EquationInline = {
+        type: 'equation',
+        id: generateId('eq'),
+        latex,
+        fontSize,
+      };
+
+      // Find the text run at cursor position and insert equation there
+      let currentOffset = 0;
+      for (let i = 0; i < para.content.length; i++) {
+        const elem = para.content[i];
+        if ('text' in elem) {
+          const runLength = elem.text.length;
+          if (currentOffset + runLength >= state.cursor!.offset) {
+            // Split text run and insert equation
+            const insertPos = state.cursor!.offset - currentOffset;
+            const beforeText = elem.text.slice(0, insertPos);
+            const afterText = elem.text.slice(insertPos);
+
+            // Replace current element with split elements
+            const newElements = [];
+            if (beforeText) {
+              newElements.push(createTextRun(beforeText));
+            }
+            newElements.push(eqElement);
+            if (afterText) {
+              newElements.push(createTextRun(afterText));
+            }
+
+            para.content.splice(i, 1, ...newElements);
+            state.cursor!.offset += 1; // Equation counts as 1 position
+            return;
+          }
+          currentOffset += runLength;
+        }
+      }
+
+      // Cursor is at end, append equation
+      para.content.push(eqElement);
+      state.cursor!.offset += 1;
     }, true);
   }
 

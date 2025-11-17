@@ -140,9 +140,9 @@ function App() {
   const drawingRect = getDrawingRect(drawState);
 
   const handleEquationInsert = (latex: string) => {
-    // Insert equation as text for now
+    // Insert equation as inline element
     if (state.editingFrameId) {
-      store.insertText(`[EQ: ${latex}]`);
+      store.insertEquation(latex, 14);
     }
     setShowEquationDialog(false);
   };
