@@ -402,24 +402,113 @@ class DocumentStore {
   }
 
   toggleBold(): void {
-    if (!this.state.selection || !this.state.editingFrameId) return;
+    if (!this.state.cursor || !this.state.editingFrameId) return;
 
     this.update((state) => {
       const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
       if (!frame || frame.type !== 'text') return;
 
-      // Toggle bold on selection - simplified
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (para && para.content.length > 0) {
+        // Toggle bold on current paragraph's text runs
+        for (const elem of para.content) {
+          if ('text' in elem) {
+            elem.overrides = elem.overrides || {};
+            elem.overrides.weight = elem.overrides.weight === 'bold' ? 'normal' : 'bold';
+          }
+        }
+      }
     }, true);
   }
 
   toggleItalic(): void {
-    if (!this.state.selection || !this.state.editingFrameId) return;
+    if (!this.state.cursor || !this.state.editingFrameId) return;
 
     this.update((state) => {
       const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
       if (!frame || frame.type !== 'text') return;
 
-      // Toggle italic on selection - simplified
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (para && para.content.length > 0) {
+        for (const elem of para.content) {
+          if ('text' in elem) {
+            elem.overrides = elem.overrides || {};
+            elem.overrides.style = elem.overrides.style === 'italic' ? 'normal' : 'italic';
+          }
+        }
+      }
+    }, true);
+  }
+
+  toggleUnderline(): void {
+    if (!this.state.cursor || !this.state.editingFrameId) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (para && para.content.length > 0) {
+        for (const elem of para.content) {
+          if ('text' in elem) {
+            elem.overrides = elem.overrides || {};
+            elem.overrides.underline = !elem.overrides.underline;
+          }
+        }
+      }
+    }, true);
+  }
+
+  applyFontFamily(family: string): void {
+    if (!this.state.cursor || !this.state.editingFrameId) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (para && para.content.length > 0) {
+        for (const elem of para.content) {
+          if ('text' in elem) {
+            elem.overrides = elem.overrides || {};
+            elem.overrides.family = family;
+          }
+        }
+      }
+    }, true);
+  }
+
+  applyFontSize(size: number): void {
+    if (!this.state.cursor || !this.state.editingFrameId) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (para && para.content.length > 0) {
+        for (const elem of para.content) {
+          if ('text' in elem) {
+            elem.overrides = elem.overrides || {};
+            elem.overrides.size = size;
+          }
+        }
+      }
+    }, true);
+  }
+
+  setAlignment(alignment: 'left' | 'center' | 'right' | 'justified'): void {
+    if (!this.state.cursor || !this.state.editingFrameId) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (para) {
+        para.overrides = para.overrides || {};
+        para.overrides.alignment = alignment;
+      }
     }, true);
   }
 

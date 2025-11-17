@@ -1,12 +1,46 @@
 // Format Toolbar - paragraph and character formatting
-import React from 'react';
+import React, { useState } from 'react';
 import { store, useStore } from '../../document/store';
 
 export const FormatToolbar: React.FC = () => {
   const state = useStore();
+  const [fontFamily, setFontFamily] = useState('Times New Roman');
+  const [fontSize, setFontSize] = useState('12');
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
 
   const handleParagraphFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     store.applyParagraphFormat(e.target.value);
+  };
+
+  const handleFontFamilyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFontFamily(e.target.value);
+    store.applyFontFamily(e.target.value);
+  };
+
+  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFontSize(e.target.value);
+    store.applyFontSize(parseInt(e.target.value));
+  };
+
+  const handleBoldClick = () => {
+    setIsBold(!isBold);
+    store.toggleBold();
+  };
+
+  const handleItalicClick = () => {
+    setIsItalic(!isItalic);
+    store.toggleItalic();
+  };
+
+  const handleUnderlineClick = () => {
+    setIsUnderline(!isUnderline);
+    store.toggleUnderline();
+  };
+
+  const handleAlignClick = (align: 'left' | 'center' | 'right' | 'justified') => {
+    store.setAlignment(align);
   };
 
   return (
@@ -29,7 +63,12 @@ export const FormatToolbar: React.FC = () => {
       <div className="toolbar-divider" />
 
       <div className="toolbar-group">
-        <select className="format-select font-family" title="Font Family">
+        <select
+          className="format-select font-family"
+          value={fontFamily}
+          onChange={handleFontFamilyChange}
+          title="Font Family"
+        >
           <option value="Times New Roman">Times New Roman</option>
           <option value="Helvetica">Helvetica</option>
           <option value="Arial">Arial</option>
@@ -37,7 +76,12 @@ export const FormatToolbar: React.FC = () => {
           <option value="Georgia">Georgia</option>
         </select>
 
-        <select className="format-select font-size" title="Font Size">
+        <select
+          className="format-select font-size"
+          value={fontSize}
+          onChange={handleFontSizeChange}
+          title="Font Size"
+        >
           <option value="8">8</option>
           <option value="9">9</option>
           <option value="10">10</option>
@@ -60,20 +104,24 @@ export const FormatToolbar: React.FC = () => {
 
       <div className="toolbar-group">
         <button
-          className="format-btn"
-          onClick={() => store.toggleBold()}
+          className={`format-btn ${isBold ? 'active' : ''}`}
+          onClick={handleBoldClick}
           title="Bold (Ctrl+B)"
         >
           <strong>B</strong>
         </button>
         <button
-          className="format-btn"
-          onClick={() => store.toggleItalic()}
+          className={`format-btn ${isItalic ? 'active' : ''}`}
+          onClick={handleItalicClick}
           title="Italic (Ctrl+I)"
         >
           <em>I</em>
         </button>
-        <button className="format-btn" title="Underline (Ctrl+U)">
+        <button
+          className={`format-btn ${isUnderline ? 'active' : ''}`}
+          onClick={handleUnderlineClick}
+          title="Underline (Ctrl+U)"
+        >
           <u>U</u>
         </button>
       </div>
@@ -81,16 +129,32 @@ export const FormatToolbar: React.FC = () => {
       <div className="toolbar-divider" />
 
       <div className="toolbar-group">
-        <button className="format-btn" title="Align Left">
-          ≡
+        <button
+          className="format-btn"
+          onClick={() => handleAlignClick('left')}
+          title="Align Left"
+        >
+          ⫷
         </button>
-        <button className="format-btn" title="Align Center">
-          ≡
+        <button
+          className="format-btn"
+          onClick={() => handleAlignClick('center')}
+          title="Align Center"
+        >
+          ⫶
         </button>
-        <button className="format-btn" title="Align Right">
-          ≡
+        <button
+          className="format-btn"
+          onClick={() => handleAlignClick('right')}
+          title="Align Right"
+        >
+          ⫸
         </button>
-        <button className="format-btn" title="Justify">
+        <button
+          className="format-btn"
+          onClick={() => handleAlignClick('justified')}
+          title="Justify"
+        >
           ≡
         </button>
       </div>
