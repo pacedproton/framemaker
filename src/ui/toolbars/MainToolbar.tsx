@@ -9,20 +9,17 @@ export const MainToolbar: React.FC = () => {
     <div className="fm-main-toolbar">
       <div className="toolbar-group">
         <button
-          className="toolbar-btn icon-btn"
+          className="toolbar-btn"
           onClick={() => store.newDocument('Untitled')}
           title="New Document (Ctrl+N)"
         >
-          <span className="btn-icon">📄</span>
+          New
         </button>
-        <button className="toolbar-btn icon-btn" title="Open Document (Ctrl+O)">
-          <span className="btn-icon">📂</span>
+        <button className="toolbar-btn" title="Open Document (Ctrl+O)">
+          Open
         </button>
-        <button className="toolbar-btn icon-btn" title="Save Document (Ctrl+S)">
-          <span className="btn-icon">💾</span>
-        </button>
-        <button className="toolbar-btn icon-btn" title="Print (Ctrl+P)">
-          <span className="btn-icon">🖨️</span>
+        <button className="toolbar-btn" title="Save Document (Ctrl+S)">
+          Save
         </button>
       </div>
 
@@ -30,34 +27,20 @@ export const MainToolbar: React.FC = () => {
 
       <div className="toolbar-group">
         <button
-          className="toolbar-btn icon-btn"
+          className="toolbar-btn"
           onClick={() => store.undo()}
           disabled={!store.canUndo()}
           title="Undo (Ctrl+Z)"
         >
-          <span className="btn-icon">↩️</span>
+          Undo
         </button>
         <button
-          className="toolbar-btn icon-btn"
+          className="toolbar-btn"
           onClick={() => store.redo()}
           disabled={!store.canRedo()}
           title="Redo (Ctrl+Shift+Z)"
         >
-          <span className="btn-icon">↪️</span>
-        </button>
-      </div>
-
-      <div className="toolbar-divider" />
-
-      <div className="toolbar-group">
-        <button className="toolbar-btn icon-btn" title="Cut (Ctrl+X)">
-          <span className="btn-icon">✂️</span>
-        </button>
-        <button className="toolbar-btn icon-btn" title="Copy (Ctrl+C)">
-          <span className="btn-icon">📋</span>
-        </button>
-        <button className="toolbar-btn icon-btn" title="Paste (Ctrl+V)">
-          <span className="btn-icon">📌</span>
+          Redo
         </button>
       </div>
 
@@ -65,40 +48,37 @@ export const MainToolbar: React.FC = () => {
 
       <div className="toolbar-group">
         <button
-          className={`toolbar-btn tool-btn ${state.activeTool === 'select' ? 'active' : ''}`}
+          className={`toolbar-btn ${state.activeTool === 'select' ? 'active' : ''}`}
           onClick={() => store.setActiveTool('select')}
           title="Smart Select (V)"
         >
-          <span className="btn-icon">⬚</span>
-          <span className="btn-label">Select</span>
+          [+]
         </button>
         <button
-          className={`toolbar-btn tool-btn ${state.activeTool === 'text' ? 'active' : ''}`}
+          className={`toolbar-btn ${state.activeTool === 'text' ? 'active' : ''}`}
           onClick={() => store.setActiveTool('text')}
-          title="Text Insertion (T)"
+          title="Text Tool (T)"
         >
-          <span className="btn-icon">I</span>
-          <span className="btn-label">Text</span>
+          A
         </button>
         <button
-          className={`toolbar-btn tool-btn ${state.activeTool === 'textFrame' ? 'active' : ''}`}
+          className={`toolbar-btn ${state.activeTool === 'textFrame' ? 'active' : ''}`}
           onClick={() => store.setActiveTool('textFrame')}
           title="Draw Text Frame (F)"
         >
-          <span className="btn-icon">▭</span>
-          <span className="btn-label">Frame</span>
+          [_]
         </button>
       </div>
 
       <div className="toolbar-divider" />
 
-      <div className="toolbar-group zoom-group">
+      <div className="toolbar-group">
         <button
-          className="toolbar-btn icon-btn small"
+          className="toolbar-btn"
           onClick={() => store.setZoom(state.zoom - 25)}
-          title="Zoom Out (Ctrl+-)"
+          title="Zoom Out"
         >
-          <span className="btn-icon">🔍−</span>
+          -
         </button>
         <select
           className="zoom-select"
@@ -110,50 +90,65 @@ export const MainToolbar: React.FC = () => {
           <option value="50">50%</option>
           <option value="75">75%</option>
           <option value="100">100%</option>
-          <option value="125">125%</option>
           <option value="150">150%</option>
           <option value="200">200%</option>
-          <option value="400">400%</option>
         </select>
         <button
-          className="toolbar-btn icon-btn small"
+          className="toolbar-btn"
           onClick={() => store.setZoom(state.zoom + 25)}
-          title="Zoom In (Ctrl+=)"
+          title="Zoom In"
         >
-          <span className="btn-icon">🔍+</span>
-        </button>
-        <button
-          className="toolbar-btn icon-btn small"
-          onClick={() => store.setZoom(100)}
-          title="Fit Page"
-        >
-          <span className="btn-icon">⊡</span>
+          +
         </button>
       </div>
 
       <div className="toolbar-divider" />
 
-      <div className="toolbar-group view-toggles">
+      <div className="toolbar-group">
         <button
-          className={`toolbar-btn toggle-btn ${state.showGrid ? 'active' : ''}`}
+          className={`toolbar-btn ${state.showGrid ? 'active' : ''}`}
           onClick={() => store.toggleGrid()}
           title="Toggle Grid"
         >
-          <span className="btn-icon">⊞</span>
+          Grid
         </button>
         <button
-          className={`toolbar-btn toggle-btn ${state.showMargins ? 'active' : ''}`}
-          onClick={() => store.toggleMargins()}
-          title="Toggle Margins"
-        >
-          <span className="btn-icon">⊟</span>
-        </button>
-        <button
-          className={`toolbar-btn toggle-btn ${state.showFrameBorders ? 'active' : ''}`}
+          className={`toolbar-btn ${state.showFrameBorders ? 'active' : ''}`}
           onClick={() => store.toggleFrameBorders()}
-          title="Toggle Frame Borders"
+          title="Toggle Borders"
         >
-          <span className="btn-icon">▢</span>
+          Bord
+        </button>
+      </div>
+
+      <div className="toolbar-divider" />
+
+      <div className="toolbar-group">
+        <span className="toolbar-label">
+          Page {state.currentPageIndex + 1}/{state.document.pages.length}
+        </span>
+        <button
+          className="toolbar-btn"
+          onClick={() => store.setCurrentPage(state.currentPageIndex - 1)}
+          disabled={state.currentPageIndex === 0}
+          title="Previous Page"
+        >
+          &lt;
+        </button>
+        <button
+          className="toolbar-btn"
+          onClick={() => store.setCurrentPage(state.currentPageIndex + 1)}
+          disabled={state.currentPageIndex === state.document.pages.length - 1}
+          title="Next Page"
+        >
+          &gt;
+        </button>
+        <button
+          className="toolbar-btn"
+          onClick={() => store.addPage()}
+          title="Add Page"
+        >
+          +Pg
         </button>
       </div>
     </div>

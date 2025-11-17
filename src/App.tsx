@@ -15,8 +15,6 @@ import { ImageDialog } from './ui/ImageDialog';
 import { CharacterDialog } from './ui/CharacterDialog';
 import { FindReplaceDialog } from './ui/FindReplaceDialog';
 import { DocumentStatsDialog } from './ui/DocumentStatsDialog';
-import { PropertiesPanel } from './ui/PropertiesPanel';
-import { PageNavigator } from './ui/PageNavigator';
 import {
   createDrawingState,
   startDrawing,
@@ -40,7 +38,6 @@ function App() {
   const [showCharacterDialog, setShowCharacterDialog] = useState(false);
   const [showFindReplaceDialog, setShowFindReplaceDialog] = useState(false);
   const [showDocumentStatsDialog, setShowDocumentStatsDialog] = useState(false);
-  const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
 
   // Listen for custom events
   useEffect(() => {
@@ -117,12 +114,6 @@ function App() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
         setShowFindReplaceDialog(true);
-      }
-
-      // Toggle properties panel
-      if (e.key === 'F7') {
-        e.preventDefault();
-        setShowPropertiesPanel((v) => !v);
       }
 
       // Delete selected frame
@@ -211,62 +202,54 @@ function App() {
       <MainToolbar />
       <FormatToolbar />
 
-      <div className="fm-main-area">
-        <div className="fm-workspace">
-          <RulerCorner />
-          <Ruler orientation="horizontal" />
+      <div className="fm-workspace">
+        <RulerCorner />
+        <Ruler orientation="horizontal" />
 
-          <Ruler orientation="vertical" />
+        <Ruler orientation="vertical" />
 
-          <div className="fm-canvas-container">
+        <div className="fm-canvas-container">
+          <div
+            ref={canvasRef}
+            className="fm-canvas"
+            onMouseDown={handleCanvasMouseDown}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+            onMouseLeave={handleCanvasMouseUp}
+          >
             <div
-              ref={canvasRef}
-              className="fm-canvas"
-              onMouseDown={handleCanvasMouseDown}
-              onMouseMove={handleCanvasMouseMove}
-              onMouseUp={handleCanvasMouseUp}
-              onMouseLeave={handleCanvasMouseUp}
+              className="fm-canvas-scaler"
+              style={{
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+              }}
             >
-              <div
-                className="fm-canvas-scaler"
-                style={{
-                  transform: `scale(${scale})`,
-                  transformOrigin: 'top left',
-                }}
-              >
-                <div className="fm-pasteboard">
-                  <PageRenderer page={currentPage} scale={1} />
+              <div className="fm-pasteboard">
+                <PageRenderer page={currentPage} scale={1} />
 
-                  {/* Drawing preview */}
-                  {drawingRect && (
-                    <div
-                      className="fm-drawing-preview"
-                      style={{
-                        position: 'absolute',
-                        left: `${drawingRect.x}px`,
-                        top: `${drawingRect.y}px`,
-                        width: `${drawingRect.width}px`,
-                        height: `${drawingRect.height}px`,
-                        border: '2px dashed #2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  )}
-                </div>
+                {/* Drawing preview */}
+                {drawingRect && (
+                  <div
+                    className="fm-drawing-preview"
+                    style={{
+                      position: 'absolute',
+                      left: `${drawingRect.x}px`,
+                      top: `${drawingRect.y}px`,
+                      width: `${drawingRect.width}px`,
+                      height: `${drawingRect.height}px`,
+                      border: '1px dashed #000080',
+                      backgroundColor: 'transparent',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Properties Panel */}
-        {showPropertiesPanel && <PropertiesPanel />}
       </div>
 
-      <div className="fm-bottom-bar">
-        <PageNavigator />
-        <StatusBar />
-      </div>
+      <StatusBar />
 
       {/* Floating Palettes */}
       <ToolPalette visible={showToolPalette} onClose={() => setShowToolPalette(false)} />
