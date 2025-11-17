@@ -175,6 +175,11 @@ export const MenuBar: React.FC = () => {
   const graphicsMenuItems: MenuItem[] = [
     { label: 'Tools', action: () => window.dispatchEvent(new CustomEvent('toggleToolPalette')) },
     { separator: true },
+    {
+      label: 'Insert Image...',
+      action: () => window.dispatchEvent(new CustomEvent('showImageDialog')),
+    },
+    { separator: true },
     { label: 'Bring to Front', disabled: true },
     { label: 'Send to Back', disabled: true },
     { separator: true },

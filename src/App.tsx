@@ -11,6 +11,7 @@ import { PageRenderer } from './render/PageRenderer';
 import { ToolPalette } from './ui/ToolPalette';
 import { EquationDialog } from './ui/EquationDialog';
 import { TableDialog } from './ui/TableDialog';
+import { ImageDialog } from './ui/ImageDialog';
 import {
   createDrawingState,
   startDrawing,
@@ -30,16 +31,20 @@ function App() {
   const [showToolPalette, setShowToolPalette] = useState(false);
   const [showEquationDialog, setShowEquationDialog] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
+  const [showImageDialog, setShowImageDialog] = useState(false);
 
   // Listen for custom events
   useEffect(() => {
     const handleToggleToolPalette = () => setShowToolPalette((v) => !v);
     const handleShowTableDialog = () => setShowTableDialog(true);
+    const handleShowImageDialog = () => setShowImageDialog(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
+    window.addEventListener('showImageDialog', handleShowImageDialog);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
+      window.removeEventListener('showImageDialog', handleShowImageDialog);
     };
   }, []);
 
@@ -162,6 +167,12 @@ function App() {
     setShowTableDialog(false);
   };
 
+  const handleImageInsert = (imageUrl: string, altText: string) => {
+    // Add image frame to page
+    store.addImageFrame(imageUrl, altText);
+    setShowImageDialog(false);
+  };
+
   return (
     <div className="fm-app">
       <MenuBar />
@@ -231,6 +242,11 @@ function App() {
         visible={showTableDialog}
         onClose={() => setShowTableDialog(false)}
         onInsert={handleTableInsert}
+      />
+      <ImageDialog
+        visible={showImageDialog}
+        onClose={() => setShowImageDialog(false)}
+        onInsert={handleImageInsert}
       />
     </div>
   );

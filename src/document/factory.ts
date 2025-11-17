@@ -3,6 +3,7 @@ import type {
   FMDocument,
   Page,
   TextFrame,
+  ImageFrame,
   Paragraph,
   TextRun,
   ParagraphFormat,
@@ -64,6 +65,37 @@ export function createTextFrame(
     nextFrameId: null,
     prevFrameId: null,
     overflow: false,
+  };
+}
+
+export function createImageFrame(
+  pageId: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  imageUrl: string = '',
+  altText: string = ''
+): ImageFrame {
+  return {
+    id: generateId('img'),
+    type: 'image',
+    pageId,
+    x,
+    y,
+    width,
+    height,
+    rotation: 0,
+    zIndex: 1,
+    locked: false,
+    visible: true,
+    strokeWidth: 1,
+    strokeColor: '#000000',
+    fillColor: '#ffffff',
+    imageUrl,
+    altText,
+    objectFit: 'contain',
+    opacity: 1,
   };
 }
 

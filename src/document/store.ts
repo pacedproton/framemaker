@@ -1,7 +1,7 @@
 // Document store - central state management
 import { useState, useEffect } from 'react';
 import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline, TableInline } from './types';
-import { createInitialEditorState, createPage, createParagraph, createTextRun } from './factory';
+import { createInitialEditorState, createPage, createParagraph, createTextRun, createImageFrame } from './factory';
 import { generateId } from './types';
 import { createTable } from '../engine/TableEngine';
 
@@ -521,6 +521,26 @@ class DocumentStore {
       // Insert table as block element (at end of current paragraph content)
       para.content.push(tableElement);
       state.cursor!.offset += 1;
+    }, true);
+  }
+
+  // Image frame insertion
+  addImageFrame(imageUrl: string, altText: string = '', x?: number, y?: number, width?: number, height?: number): void {
+    this.update((state) => {
+      const page = state.document.pages[state.currentPageIndex];
+      if (!page) return;
+
+      // Default position and size
+      const frameX = x ?? 100;
+      const frameY = y ?? 100;
+      const frameW = width ?? 200;
+      const frameH = height ?? 150;
+
+      const imageFrame = createImageFrame(page.id, frameX, frameY, frameW, frameH, imageUrl, altText);
+      page.frames.push(imageFrame);
+
+      // Select the new frame
+      state.selectedFrameIds = [imageFrame.id];
     }, true);
   }
 

@@ -113,7 +113,7 @@ export interface Paragraph {
 }
 
 // Frame types
-export type FrameType = 'text' | 'anchored' | 'unanchored';
+export type FrameType = 'text' | 'anchored' | 'unanchored' | 'image';
 
 // Base frame
 export interface BaseFrame {
@@ -174,7 +174,16 @@ export interface UnanchoredFrame extends BaseFrame {
   content: string;
 }
 
-export type Frame = TextFrame | AnchoredFrame | UnanchoredFrame;
+// Image frame (for displaying images)
+export interface ImageFrame extends BaseFrame {
+  type: 'image';
+  imageUrl: string;
+  altText: string;
+  objectFit: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
+  opacity: number;
+}
+
+export type Frame = TextFrame | AnchoredFrame | UnanchoredFrame | ImageFrame;
 
 // Page
 export interface Page {
