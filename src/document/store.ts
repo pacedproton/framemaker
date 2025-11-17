@@ -512,6 +512,58 @@ class DocumentStore {
     }, true);
   }
 
+  // Text replacement for Find/Replace
+  replaceTextInDocument(
+    findText: string,
+    replaceText: string,
+    options: { caseSensitive?: boolean; wholeWord?: boolean; frameId?: string } = {}
+  ): number {
+    let totalReplaced = 0;
+
+    this.update((state) => {
+      const framesToProcess = options.frameId
+        ? state.document.pages.flatMap((p) => p.frames).filter((f) => f.id === options.frameId)
+        : state.document.pages.flatMap((p) => p.frames);
+
+      for (const frame of framesToProcess) {
+        if (frame.type === 'text') {
+          const textFrame = frame as TextFrame;
+          for (const para of textFrame.paragraphs) {
+            for (const element of para.content) {
+              if ('text' in element) {
+                const text = element.text as string;
+                let newText: string;
+
+                if (options.wholeWord) {
+                  const flags = options.caseSensitive ? 'g' : 'gi';
+                  const regex = new RegExp(`\\b${findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, flags);
+                  const matches = text.match(regex);
+                  if (matches) totalReplaced += matches.length;
+                  newText = text.replace(regex, replaceText);
+                } else {
+                  if (options.caseSensitive) {
+                    const parts = text.split(findText);
+                    totalReplaced += parts.length - 1;
+                    newText = parts.join(replaceText);
+                  } else {
+                    const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                    const matches = text.match(regex);
+                    if (matches) totalReplaced += matches.length;
+                    newText = text.replace(regex, replaceText);
+                  }
+                }
+
+                element.text = newText;
+              }
+            }
+          }
+        }
+      }
+    }, true);
+
+    return totalReplaced;
+  }
+
   // Paragraph formatting
   applyParagraphFormat(tag: string): void {
     if (!this.state.cursor || !this.state.editingFrameId) return;

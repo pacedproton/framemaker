@@ -13,6 +13,7 @@ import { EquationDialog } from './ui/EquationDialog';
 import { TableDialog } from './ui/TableDialog';
 import { ImageDialog } from './ui/ImageDialog';
 import { CharacterDialog } from './ui/CharacterDialog';
+import { FindReplaceDialog } from './ui/FindReplaceDialog';
 import { PropertiesPanel } from './ui/PropertiesPanel';
 import { PageNavigator } from './ui/PageNavigator';
 import {
@@ -36,6 +37,7 @@ function App() {
   const [showTableDialog, setShowTableDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showCharacterDialog, setShowCharacterDialog] = useState(false);
+  const [showFindReplaceDialog, setShowFindReplaceDialog] = useState(false);
   const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
 
   // Listen for custom events
@@ -44,15 +46,18 @@ function App() {
     const handleShowTableDialog = () => setShowTableDialog(true);
     const handleShowImageDialog = () => setShowImageDialog(true);
     const handleShowCharacterDialog = () => setShowCharacterDialog(true);
+    const handleShowFindReplaceDialog = () => setShowFindReplaceDialog(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
     window.addEventListener('showImageDialog', handleShowImageDialog);
     window.addEventListener('showCharacterDialog', handleShowCharacterDialog);
+    window.addEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
       window.removeEventListener('showImageDialog', handleShowImageDialog);
       window.removeEventListener('showCharacterDialog', handleShowCharacterDialog);
+      window.removeEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
     };
   }, []);
 
@@ -101,6 +106,12 @@ function App() {
       if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
         e.preventDefault();
         setShowEquationDialog(true);
+      }
+
+      // Find/Replace dialog
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        setShowFindReplaceDialog(true);
       }
 
       // Toggle properties panel
@@ -274,6 +285,10 @@ function App() {
       <CharacterDialog
         visible={showCharacterDialog}
         onClose={() => setShowCharacterDialog(false)}
+      />
+      <FindReplaceDialog
+        visible={showFindReplaceDialog}
+        onClose={() => setShowFindReplaceDialog(false)}
       />
     </div>
   );

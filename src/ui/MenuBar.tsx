@@ -123,7 +123,11 @@ export const MenuBar: React.FC = () => {
     { separator: true },
     { label: 'Select All in Flow', shortcut: 'Ctrl+A', disabled: true },
     { separator: true },
-    { label: 'Find/Change...', shortcut: 'Ctrl+F', disabled: true },
+    {
+      label: 'Find/Change...',
+      shortcut: 'Ctrl+F',
+      action: () => window.dispatchEvent(new CustomEvent('showFindReplaceDialog')),
+    },
   ];
 
   const formatMenuItems: MenuItem[] = [
