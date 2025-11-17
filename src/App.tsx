@@ -14,6 +14,7 @@ import { TableDialog } from './ui/TableDialog';
 import { ImageDialog } from './ui/ImageDialog';
 import { CharacterDialog } from './ui/CharacterDialog';
 import { FindReplaceDialog } from './ui/FindReplaceDialog';
+import { DocumentStatsDialog } from './ui/DocumentStatsDialog';
 import { PropertiesPanel } from './ui/PropertiesPanel';
 import { PageNavigator } from './ui/PageNavigator';
 import {
@@ -38,6 +39,7 @@ function App() {
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showCharacterDialog, setShowCharacterDialog] = useState(false);
   const [showFindReplaceDialog, setShowFindReplaceDialog] = useState(false);
+  const [showDocumentStatsDialog, setShowDocumentStatsDialog] = useState(false);
   const [showPropertiesPanel, setShowPropertiesPanel] = useState(true);
 
   // Listen for custom events
@@ -47,17 +49,20 @@ function App() {
     const handleShowImageDialog = () => setShowImageDialog(true);
     const handleShowCharacterDialog = () => setShowCharacterDialog(true);
     const handleShowFindReplaceDialog = () => setShowFindReplaceDialog(true);
+    const handleShowDocumentStatsDialog = () => setShowDocumentStatsDialog(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
     window.addEventListener('showImageDialog', handleShowImageDialog);
     window.addEventListener('showCharacterDialog', handleShowCharacterDialog);
     window.addEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
+    window.addEventListener('showDocumentStatsDialog', handleShowDocumentStatsDialog);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
       window.removeEventListener('showImageDialog', handleShowImageDialog);
       window.removeEventListener('showCharacterDialog', handleShowCharacterDialog);
       window.removeEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
+      window.removeEventListener('showDocumentStatsDialog', handleShowDocumentStatsDialog);
     };
   }, []);
 
@@ -289,6 +294,10 @@ function App() {
       <FindReplaceDialog
         visible={showFindReplaceDialog}
         onClose={() => setShowFindReplaceDialog(false)}
+      />
+      <DocumentStatsDialog
+        visible={showDocumentStatsDialog}
+        onClose={() => setShowDocumentStatsDialog(false)}
       />
     </div>
   );

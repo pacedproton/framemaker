@@ -1601,6 +1601,44 @@ body {
   color: #000080;
 }
 
+/* Document Statistics Dialog Styles */
+.stats-dialog {
+  min-width: 420px;
+}
+
+.stats-section {
+  margin-bottom: 12px;
+  background: white;
+  border: 1px solid #808080;
+  padding: 8px;
+}
+
+.stats-header {
+  font-weight: bold;
+  font-size: 11px;
+  color: #000080;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #c0c0c0;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.stat-label {
+  color: #404040;
+}
+
+.stat-value {
+  font-weight: 500;
+  color: #000000;
+  font-family: monospace;
+}
+
 /* Blinking cursor animation */
 @keyframes blink {
   0%, 100% { opacity: 1; }

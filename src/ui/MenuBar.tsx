@@ -109,6 +109,11 @@ export const MenuBar: React.FC = () => {
     { separator: true },
     { label: 'Print...', shortcut: 'Ctrl+P', disabled: true },
     { separator: true },
+    {
+      label: 'Document Statistics...',
+      action: () => window.dispatchEvent(new CustomEvent('showDocumentStatsDialog')),
+    },
+    { separator: true },
     { label: 'Exit', action: () => window.close() },
   ];
 
