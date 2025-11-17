@@ -680,3 +680,180 @@ body {
 .symbol-grid button:hover {
   background: #f0f0f0;
 }
+
+/* Equation Rendering Styles */
+.eq-container {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.eq-group {
+  display: inline;
+}
+
+.eq-number {
+  font-style: normal;
+}
+
+.eq-variable {
+  font-style: normal;
+}
+
+.eq-variable.italic {
+  font-style: italic;
+}
+
+.eq-operator {
+  padding: 0 3px;
+}
+
+.eq-function {
+  display: inline;
+}
+
+.eq-func-name {
+  font-style: normal;
+}
+
+.eq-paren {
+  font-size: 1.1em;
+}
+
+.eq-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0 2px;
+}
+
+.eq-numerator,
+.eq-denominator {
+  text-align: center;
+  padding: 2px 4px;
+}
+
+.eq-frac-line {
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+}
+
+.eq-superscript,
+.eq-subscript {
+  display: inline;
+}
+
+.eq-base {
+  display: inline;
+}
+
+.eq-sup,
+.eq-sub {
+  font-size: 0.7em;
+  vertical-align: baseline;
+}
+
+.eq-sup {
+  position: relative;
+  top: -0.4em;
+}
+
+.eq-sub {
+  position: relative;
+  top: 0.3em;
+}
+
+.eq-sqrt {
+  display: inline;
+  position: relative;
+}
+
+.eq-radical {
+  font-size: 1.2em;
+}
+
+.eq-radicand {
+  border-top: 1px solid currentColor;
+  padding: 0 3px;
+}
+
+.eq-root-index {
+  font-size: 0.6em;
+  position: relative;
+  left: -2px;
+}
+
+.eq-sum,
+.eq-product,
+.eq-integral {
+  display: inline;
+}
+
+.eq-big-operator {
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.eq-sigma .eq-lower,
+.eq-pi .eq-lower,
+.eq-int-sign .eq-lower {
+  font-size: 0.6em;
+  display: block;
+}
+
+.eq-sigma .eq-upper,
+.eq-pi .eq-upper,
+.eq-int-sign .eq-upper {
+  font-size: 0.6em;
+  display: block;
+}
+
+.eq-differential {
+  font-style: italic;
+  padding-left: 3px;
+}
+
+.eq-matrix {
+  display: inline-flex;
+  align-items: center;
+}
+
+.eq-matrix-bracket {
+  font-size: 2em;
+  font-weight: 100;
+}
+
+.eq-matrix-content {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.eq-matrix-row {
+  display: flex;
+}
+
+.eq-matrix-cell {
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.eq-delimiters {
+  display: inline;
+}
+
+.eq-left-delim,
+.eq-right-delim {
+  font-size: 1.2em;
+}
+
+.equation-visual-preview {
+  background: white;
+  border: 1px inset #ffffff;
+  padding: 12px;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}

@@ -54,9 +54,9 @@ export function createTextFrame(
     zIndex: 0,
     locked: false,
     visible: true,
-    strokeWidth: 0.5,
+    strokeWidth: 1,
     strokeColor: '#000000',
-    fillColor: 'transparent',
+    fillColor: '#ffffff',
     flowTag,
     columns: 1,
     columnGap: 12,
@@ -86,6 +86,11 @@ export function createPage(number: number): Page {
     pageHeight - marginTop - marginBottom,
     'A'
   );
+
+  // Add sample content so the frame is visible
+  textFrame.paragraphs = [
+    createParagraph('Click here to start typing. This is a text frame that you can drag, resize, and edit.', 'Body'),
+  ];
 
   return {
     id: pageId,

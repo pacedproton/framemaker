@@ -1,6 +1,12 @@
 // Equation Dialog - Insert mathematical equations
 import React, { useState } from 'react';
-import { equationToLatex, equationTemplates, parseSimpleEquation } from '../engine/EquationEditor';
+import {
+  equationToLatex,
+  equationTemplates,
+  parseSimpleEquation,
+  type EquationNode,
+} from '../engine/EquationEditor';
+import { EquationRenderer } from '../render/EquationRenderer';
 
 interface EquationDialogProps {
   visible: boolean;
@@ -11,15 +17,18 @@ interface EquationDialogProps {
 export const EquationDialog: React.FC<EquationDialogProps> = ({ visible, onClose, onInsert }) => {
   const [equationText, setEquationText] = useState('');
   const [preview, setPreview] = useState('');
+  const [ast, setAst] = useState<EquationNode | null>(null);
 
   const handleTextChange = (text: string) => {
     setEquationText(text);
     try {
-      const ast = parseSimpleEquation(text);
-      const latex = equationToLatex(ast);
+      const parsedAst = parseSimpleEquation(text);
+      const latex = equationToLatex(parsedAst);
       setPreview(latex);
+      setAst(parsedAst);
     } catch {
       setPreview('Invalid equation');
+      setAst(null);
     }
   };
 
@@ -28,6 +37,7 @@ export const EquationDialog: React.FC<EquationDialogProps> = ({ visible, onClose
     const latex = equationToLatex(template);
     setPreview(latex);
     setEquationText(latex);
+    setAst(template);
   };
 
   if (!visible) return null;
@@ -56,7 +66,18 @@ export const EquationDialog: React.FC<EquationDialogProps> = ({ visible, onClose
           </div>
 
           <div className="equation-preview">
-            <label>Preview (LaTeX):</label>
+            <label>Visual Preview:</label>
+            <div className="equation-visual-preview">
+              {ast ? (
+                <EquationRenderer equation={ast} fontSize={18} />
+              ) : (
+                <span style={{ color: '#808080' }}>Type an equation above or select a template</span>
+              )}
+            </div>
+          </div>
+
+          <div className="equation-preview">
+            <label>LaTeX Output:</label>
             <div className="preview-box">{preview || 'Type an equation above'}</div>
           </div>
 

@@ -17,7 +17,8 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0, frameX: 0, frameY: 0 });
+  const [isResizing, setIsResizing] = useState<string | null>(null);
+  const dragStart = useRef({ x: 0, y: 0, frameX: 0, frameY: 0, frameW: 0, frameH: 0 });
 
   // Get paragraph format from catalog
   const getParagraphFormat = useCallback(
@@ -44,22 +45,52 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
         y: e.clientY,
         frameX: frame.x,
         frameY: frame.y,
+        frameW: frame.width,
+        frameH: frame.height,
       };
     }
   };
 
   // Handle mouse move for dragging
   useEffect(() => {
-    if (!isDragging) return;
+    if (!isDragging && !isResizing) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const dx = (e.clientX - dragStart.current.x) / scale;
       const dy = (e.clientY - dragStart.current.y) / scale;
-      store.moveFrame(frame.id, dragStart.current.frameX + dx, dragStart.current.frameY + dy);
+
+      if (isDragging) {
+        store.moveFrame(frame.id, dragStart.current.frameX + dx, dragStart.current.frameY + dy);
+      } else if (isResizing) {
+        let newX = dragStart.current.frameX;
+        let newY = dragStart.current.frameY;
+        let newW = dragStart.current.frameW;
+        let newH = dragStart.current.frameH;
+
+        // Handle different resize handles
+        if (isResizing.includes('e')) newW = dragStart.current.frameW + dx;
+        if (isResizing.includes('w')) {
+          newX = dragStart.current.frameX + dx;
+          newW = dragStart.current.frameW - dx;
+        }
+        if (isResizing.includes('s')) newH = dragStart.current.frameH + dy;
+        if (isResizing.includes('n')) {
+          newY = dragStart.current.frameY + dy;
+          newH = dragStart.current.frameH - dy;
+        }
+
+        // Minimum size
+        newW = Math.max(50, newW);
+        newH = Math.max(50, newH);
+
+        store.moveFrame(frame.id, newX, newY);
+        store.resizeFrame(frame.id, newW, newH);
+      }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
+      setIsResizing(null);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -69,7 +100,22 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, frame.id, scale]);
+  }, [isDragging, isResizing, frame.id, scale]);
+
+  // Handle resize handle mouse down
+  const handleResizeMouseDown = (e: React.MouseEvent, handle: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(handle);
+    dragStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      frameX: frame.x,
+      frameY: frame.y,
+      frameW: frame.width,
+      frameH: frame.height,
+    };
+  };
 
   // Handle click to start editing or select frame
   const handleClick = (e: React.MouseEvent) => {
@@ -306,6 +352,9 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
     outline: 'none',
     fontSize: `${12 * scale}pt`,
     lineHeight: 1.5,
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    whiteSpace: 'pre-wrap',
   };
 
   return (
@@ -340,6 +389,130 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
         >
           +
         </div>
+      )}
+
+      {/* Resize handles - only show when selected and not editing */}
+      {isSelected && !isEditing && (
+        <>
+          {/* Corner handles */}
+          <div
+            className="resize-handle nw"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'nwse-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+          />
+          <div
+            className="resize-handle ne"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'nesw-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+          />
+          <div
+            className="resize-handle sw"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: -4,
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'nesw-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
+          />
+          <div
+            className="resize-handle se"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              right: -4,
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'nwse-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'se')}
+          />
+          {/* Edge handles */}
+          <div
+            className="resize-handle n"
+            style={{
+              position: 'absolute',
+              top: -4,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'ns-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'n')}
+          />
+          <div
+            className="resize-handle s"
+            style={{
+              position: 'absolute',
+              bottom: -4,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'ns-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 's')}
+          />
+          <div
+            className="resize-handle w"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: -4,
+              transform: 'translateY(-50%)',
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'ew-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'w')}
+          />
+          <div
+            className="resize-handle e"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              right: -4,
+              transform: 'translateY(-50%)',
+              width: 8,
+              height: 8,
+              background: 'white',
+              border: '1px solid #0066ff',
+              cursor: 'ew-resize',
+            }}
+            onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+          />
+        </>
       )}
     </div>
   );
