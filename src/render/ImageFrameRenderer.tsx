@@ -98,10 +98,10 @@ export const ImageFrameRenderer: React.FC<ImageFrameRendererProps> = ({ frame, s
 
   const frameStyle: React.CSSProperties = {
     position: 'absolute',
-    left: `${frame.x * scale}px`,
-    top: `${frame.y * scale}px`,
-    width: `${frame.width * scale}px`,
-    height: `${frame.height * scale}px`,
+    left: `${frame.x}px`,
+    top: `${frame.y}px`,
+    width: `${frame.width}px`,
+    height: `${frame.height}px`,
     transform: frame.rotation ? `rotate(${frame.rotation}deg)` : undefined,
     transformOrigin: 'center center',
     border: isSelected ? '2px solid #0066ff' : `${frame.strokeWidth}px solid ${frame.strokeColor}`,

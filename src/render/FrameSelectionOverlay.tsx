@@ -1,116 +1,112 @@
 // Frame Selection Overlay - shows selection handles and allows dragging
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { Frame } from '../document/types';
 import { store, useStore } from '../document/store';
-import {
-  createDragState,
-  startDrag,
-  calculateDragPosition,
-  calculateResize,
-  hitTestHandle,
-  getHandleCursor,
-  type ResizeHandle,
-  type DragState,
-} from '../engine/FrameSelection';
 
 interface FrameSelectionOverlayProps {
   frame: Frame;
   scale: number;
 }
 
+type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
+
 export const FrameSelectionOverlay: React.FC<FrameSelectionOverlayProps> = ({ frame, scale }) => {
   const state = useStore();
-  const [dragState, setDragState] = useState<DragState>(createDragState());
-  const [currentHandle, setCurrentHandle] = useState<ResizeHandle | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState<ResizeHandle | null>(null);
+  const dragStart = useRef({ mouseX: 0, mouseY: 0, frameX: 0, frameY: 0, frameW: 0, frameH: 0 });
 
   const isSelected = state.selectedFrameIds.includes(frame.id);
+
+  // Global mouse move/up handlers for drag and resize
+  useEffect(() => {
+    if (!isDragging && !isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const dx = (e.clientX - dragStart.current.mouseX) / scale;
+      const dy = (e.clientY - dragStart.current.mouseY) / scale;
+
+      if (isDragging) {
+        store.moveFrame(frame.id, dragStart.current.frameX + dx, dragStart.current.frameY + dy);
+      } else if (isResizing) {
+        let newX = dragStart.current.frameX;
+        let newY = dragStart.current.frameY;
+        let newW = dragStart.current.frameW;
+        let newH = dragStart.current.frameH;
+
+        // Handle resize based on which handle is being dragged
+        if (isResizing.includes('e')) newW = Math.max(50, dragStart.current.frameW + dx);
+        if (isResizing.includes('w')) {
+          newX = dragStart.current.frameX + dx;
+          newW = Math.max(50, dragStart.current.frameW - dx);
+        }
+        if (isResizing.includes('s')) newH = Math.max(50, dragStart.current.frameH + dy);
+        if (isResizing.includes('n')) {
+          newY = dragStart.current.frameY + dy;
+          newH = Math.max(50, dragStart.current.frameH - dy);
+        }
+
+        store.moveFrame(frame.id, newX, newY);
+        store.resizeFrame(frame.id, newW, newH);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(null);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, isResizing, frame.id, scale]);
 
   if (!isSelected) return null;
 
   const handleSize = 8;
 
-  // Handle positions
-  const handles: { handle: ResizeHandle; x: number; y: number }[] = [
-    { handle: 'nw', x: frame.x * scale, y: frame.y * scale },
-    { handle: 'n', x: (frame.x + frame.width / 2) * scale, y: frame.y * scale },
-    { handle: 'ne', x: (frame.x + frame.width) * scale, y: frame.y * scale },
-    { handle: 'e', x: (frame.x + frame.width) * scale, y: (frame.y + frame.height / 2) * scale },
-    { handle: 'se', x: (frame.x + frame.width) * scale, y: (frame.y + frame.height) * scale },
-    { handle: 's', x: (frame.x + frame.width / 2) * scale, y: (frame.y + frame.height) * scale },
-    { handle: 'sw', x: frame.x * scale, y: (frame.y + frame.height) * scale },
-    { handle: 'w', x: frame.x * scale, y: (frame.y + frame.height / 2) * scale },
+  // Handle positions relative to frame
+  const handles: { handle: ResizeHandle; x: number; y: number; cursor: string }[] = [
+    { handle: 'nw', x: 0, y: 0, cursor: 'nwse-resize' },
+    { handle: 'n', x: frame.width / 2, y: 0, cursor: 'ns-resize' },
+    { handle: 'ne', x: frame.width, y: 0, cursor: 'nesw-resize' },
+    { handle: 'e', x: frame.width, y: frame.height / 2, cursor: 'ew-resize' },
+    { handle: 'se', x: frame.width, y: frame.height, cursor: 'nwse-resize' },
+    { handle: 's', x: frame.width / 2, y: frame.height, cursor: 'ns-resize' },
+    { handle: 'sw', x: 0, y: frame.height, cursor: 'nesw-resize' },
+    { handle: 'w', x: 0, y: frame.height / 2, cursor: 'ew-resize' },
   ];
 
-  const handleMouseDown = (e: React.MouseEvent, handle: ResizeHandle | null = null) => {
+  const handleFrameMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-
-    const rect = (e.target as HTMLElement).parentElement?.getBoundingClientRect();
-    if (!rect) return;
-
-    const point = {
-      x: (e.clientX - rect.left) / scale,
-      y: (e.clientY - rect.top) / scale,
+    setIsDragging(true);
+    dragStart.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      frameX: frame.x,
+      frameY: frame.y,
+      frameW: frame.width,
+      frameH: frame.height,
     };
-
-    setCurrentHandle(handle);
-    setDragState(startDrag(createDragState(), frame.id, frame, point, handle));
-
-    // Add global mouse event listeners
-    const handleGlobalMouseMove = (moveEvent: MouseEvent) => {
-      const movePoint = {
-        x: (moveEvent.clientX - rect.left) / scale,
-        y: (moveEvent.clientY - rect.top) / scale,
-      };
-
-      if (handle) {
-        // Resizing
-        const newSize = calculateResize(
-          { ...dragState, startPoint: point, frameStartX: frame.x, frameStartY: frame.y, handle },
-          frame,
-          movePoint
-        );
-        store.resizeFrame(frame.id, newSize.width, newSize.height);
-        if (newSize.x !== frame.x || newSize.y !== frame.y) {
-          store.moveFrame(frame.id, newSize.x, newSize.y);
-        }
-      } else {
-        // Moving
-        const newPos = calculateDragPosition(
-          { ...dragState, startPoint: point, frameStartX: frame.x, frameStartY: frame.y },
-          movePoint
-        );
-        store.moveFrame(frame.id, newPos.x, newPos.y);
-      }
-    };
-
-    const handleGlobalMouseUp = () => {
-      setDragState(createDragState());
-      setCurrentHandle(null);
-      window.removeEventListener('mousemove', handleGlobalMouseMove);
-      window.removeEventListener('mouseup', handleGlobalMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleGlobalMouseMove);
-    window.addEventListener('mouseup', handleGlobalMouseUp);
   };
 
-  const handleFrameClick = (e: React.MouseEvent) => {
+  const handleResizeMouseDown = (e: React.MouseEvent, handle: ResizeHandle) => {
     e.stopPropagation();
-
-    // Check if clicking on a handle
-    const rect = (e.target as HTMLElement).getBoundingClientRect();
-    const point = {
-      x: (e.clientX - rect.left) / scale + frame.x,
-      y: (e.clientY - rect.top) / scale + frame.y,
+    e.preventDefault();
+    setIsResizing(handle);
+    dragStart.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      frameX: frame.x,
+      frameY: frame.y,
+      frameW: frame.width,
+      frameH: frame.height,
     };
-
-    const handle = hitTestHandle(frame, point);
-    if (handle) {
-      handleMouseDown(e, handle);
-    } else {
-      handleMouseDown(e, null);
-    }
   };
 
   return (
@@ -118,15 +114,15 @@ export const FrameSelectionOverlay: React.FC<FrameSelectionOverlayProps> = ({ fr
       className="fm-frame-selection"
       style={{
         position: 'absolute',
-        left: `${frame.x * scale}px`,
-        top: `${frame.y * scale}px`,
-        width: `${frame.width * scale}px`,
-        height: `${frame.height * scale}px`,
+        left: `${frame.x}px`,
+        top: `${frame.y}px`,
+        width: `${frame.width}px`,
+        height: `${frame.height}px`,
         pointerEvents: 'none',
         zIndex: 1000,
       }}
     >
-      {/* Selection border */}
+      {/* Draggable selection border */}
       <div
         style={{
           position: 'absolute',
@@ -136,9 +132,9 @@ export const FrameSelectionOverlay: React.FC<FrameSelectionOverlayProps> = ({ fr
           bottom: 0,
           border: '2px solid #2563eb',
           pointerEvents: 'all',
-          cursor: dragState.isDragging ? 'grabbing' : 'move',
+          cursor: isDragging ? 'grabbing' : 'move',
         }}
-        onMouseDown={handleFrameClick}
+        onMouseDown={handleFrameMouseDown}
       />
 
       {/* Resize handles */}
@@ -147,21 +143,21 @@ export const FrameSelectionOverlay: React.FC<FrameSelectionOverlayProps> = ({ fr
           key={h.handle}
           style={{
             position: 'absolute',
-            left: `${h.x - frame.x * scale - handleSize / 2}px`,
-            top: `${h.y - frame.y * scale - handleSize / 2}px`,
+            left: `${h.x - handleSize / 2}px`,
+            top: `${h.y - handleSize / 2}px`,
             width: `${handleSize}px`,
             height: `${handleSize}px`,
             backgroundColor: 'white',
             border: '1px solid #2563eb',
-            cursor: getHandleCursor(h.handle),
+            cursor: h.cursor,
             pointerEvents: 'all',
           }}
-          onMouseDown={(e) => handleMouseDown(e, h.handle)}
+          onMouseDown={(e) => handleResizeMouseDown(e, h.handle)}
         />
       ))}
 
-      {/* Frame info tooltip */}
-      {dragState.isDragging && (
+      {/* Frame info tooltip while dragging */}
+      {(isDragging || isResizing) && (
         <div
           style={{
             position: 'absolute',
@@ -173,9 +169,10 @@ export const FrameSelectionOverlay: React.FC<FrameSelectionOverlayProps> = ({ fr
             borderRadius: '3px',
             fontSize: '10px',
             whiteSpace: 'nowrap',
+            pointerEvents: 'none',
           }}
         >
-          {currentHandle
+          {isResizing
             ? `${Math.round(frame.width)}pt × ${Math.round(frame.height)}pt`
             : `${Math.round(frame.x)}pt, ${Math.round(frame.y)}pt`}
         </div>

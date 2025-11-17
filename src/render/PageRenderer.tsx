@@ -18,8 +18,8 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
 
   const pageStyle: React.CSSProperties = {
     position: 'relative',
-    width: `${pageSize.width * scale}px`,
-    height: `${pageSize.height * scale}px`,
+    width: `${pageSize.width}px`,
+    height: `${pageSize.height}px`,
     backgroundColor: '#ffffff',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
     margin: '0 auto',
@@ -29,18 +29,18 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
   const renderGrid = () => {
     if (!showGrid) return null;
 
-    const gridSize = state.document.settings.gridSpacing * scale;
+    const gridSize = state.document.settings.gridSpacing;
     const lines: React.ReactElement[] = [];
 
     // Vertical lines
-    for (let x = 0; x <= pageSize.width * scale; x += gridSize) {
+    for (let x = 0; x <= pageSize.width; x += gridSize) {
       lines.push(
         <line
           key={`v-${x}`}
           x1={x}
           y1={0}
           x2={x}
-          y2={pageSize.height * scale}
+          y2={pageSize.height}
           stroke="#e0e0e0"
           strokeWidth="0.5"
         />
@@ -48,13 +48,13 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
     }
 
     // Horizontal lines
-    for (let y = 0; y <= pageSize.height * scale; y += gridSize) {
+    for (let y = 0; y <= pageSize.height; y += gridSize) {
       lines.push(
         <line
           key={`h-${y}`}
           x1={0}
           y1={y}
-          x2={pageSize.width * scale}
+          x2={pageSize.width}
           y2={y}
           stroke="#e0e0e0"
           strokeWidth="0.5"
@@ -83,10 +83,10 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
     if (!showMargins) return null;
 
     const marginRect = {
-      x: margins.left * scale,
-      y: margins.top * scale,
-      width: (pageSize.width - margins.left - margins.right) * scale,
-      height: (pageSize.height - margins.top - margins.bottom) * scale,
+      x: margins.left,
+      y: margins.top,
+      width: pageSize.width - margins.left - margins.right,
+      height: pageSize.height - margins.top - margins.bottom,
     };
 
     return (
@@ -126,10 +126,10 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
             key={frame.id}
             style={{
               position: 'absolute',
-              left: frame.x * scale,
-              top: frame.y * scale,
-              width: frame.width * scale,
-              height: frame.height * scale,
+              left: frame.x,
+              top: frame.y,
+              width: frame.width,
+              height: frame.height,
               border: '1px dashed #f59e0b',
               backgroundColor: 'rgba(245, 158, 11, 0.1)',
             }}
@@ -144,10 +144,10 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
             key={frame.id}
             style={{
               position: 'absolute',
-              left: frame.x * scale,
-              top: frame.y * scale,
-              width: frame.width * scale,
-              height: frame.height * scale,
+              left: frame.x,
+              top: frame.y,
+              width: frame.width,
+              height: frame.height,
               border: '1px solid #10b981',
               backgroundColor: 'rgba(16, 185, 129, 0.1)',
             }}

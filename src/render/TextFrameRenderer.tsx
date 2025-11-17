@@ -392,10 +392,10 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
 
   const frameStyle: React.CSSProperties = {
     position: 'absolute',
-    left: `${frame.x * scale}px`,
-    top: `${frame.y * scale}px`,
-    width: `${frame.width * scale}px`,
-    height: `${frame.height * scale}px`,
+    left: `${frame.x}px`,
+    top: `${frame.y}px`,
+    width: `${frame.width}px`,
+    height: `${frame.height}px`,
     transform: frame.rotation ? `rotate(${frame.rotation}deg)` : undefined,
     transformOrigin: 'center center',
     border: state.showFrameBorders
@@ -416,7 +416,7 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
     padding: '6px',
     boxSizing: 'border-box',
     outline: 'none',
-    fontSize: `${12 * scale}pt`,
+    fontSize: '12pt',
     lineHeight: 1.5,
     wordWrap: 'break-word',
     overflowWrap: 'break-word',
