@@ -22,16 +22,31 @@ export const Ruler: React.FC<RulerProps> = ({ orientation }) => {
     for (let i = 0; i <= majorTickCount; i++) {
       const pos = i * tickInterval * scale;
 
-      // Major tick
+      // Major tick with label
+      const tickHeight = orientation === 'horizontal' ? 12 : undefined;
+      const tickWidth = orientation === 'vertical' ? 12 : undefined;
+
       ticks.push(
         <div
           key={`major-${i}`}
           className="ruler-tick major"
           style={{
             [orientation === 'horizontal' ? 'left' : 'top']: `${pos}px`,
+            [orientation === 'horizontal' ? 'height' : 'width']: tickHeight || tickWidth,
+          }}
+        />
+      );
+
+      // Label
+      ticks.push(
+        <div
+          key={`label-${i}`}
+          className="ruler-label"
+          style={{
+            [orientation === 'horizontal' ? 'left' : 'top']: `${pos}px`,
           }}
         >
-          <span className="tick-label">{i}</span>
+          {i}
         </div>
       );
 
@@ -40,12 +55,14 @@ export const Ruler: React.FC<RulerProps> = ({ orientation }) => {
         for (let j = 1; j < subTickCount; j++) {
           const subPos = pos + (j * tickInterval * scale) / subTickCount;
           const isHalfTick = j === subTickCount / 2;
+
           ticks.push(
             <div
               key={`minor-${i}-${j}`}
               className={`ruler-tick ${isHalfTick ? 'half' : 'minor'}`}
               style={{
                 [orientation === 'horizontal' ? 'left' : 'top']: `${subPos}px`,
+                [orientation === 'horizontal' ? 'height' : 'width']: isHalfTick ? 8 : 4,
               }}
             />
           );
@@ -56,31 +73,8 @@ export const Ruler: React.FC<RulerProps> = ({ orientation }) => {
     return ticks;
   };
 
-  const rulerStyle: React.CSSProperties =
-    orientation === 'horizontal'
-      ? {
-          position: 'absolute',
-          top: 0,
-          left: 30, // Leave space for vertical ruler corner
-          width: `${rulerLength * scale}px`,
-          height: '24px',
-          backgroundColor: '#f0f0f0',
-          borderBottom: '1px solid #ccc',
-          overflow: 'hidden',
-        }
-      : {
-          position: 'absolute',
-          top: 24, // Below horizontal ruler
-          left: 0,
-          width: '30px',
-          height: `${rulerLength * scale}px`,
-          backgroundColor: '#f0f0f0',
-          borderRight: '1px solid #ccc',
-          overflow: 'hidden',
-        };
-
   return (
-    <div className={`fm-ruler fm-ruler-${orientation}`} style={rulerStyle}>
+    <div className={`fm-ruler ${orientation}`}>
       {renderTicks()}
     </div>
   );
@@ -91,24 +85,7 @@ export const RulerCorner: React.FC = () => {
   const state = useStore();
 
   return (
-    <div
-      className="fm-ruler-corner"
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '30px',
-        height: '24px',
-        backgroundColor: '#f0f0f0',
-        borderBottom: '1px solid #ccc',
-        borderRight: '1px solid #ccc',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '9px',
-        color: '#666',
-      }}
-    >
+    <div className="fm-ruler-corner">
       {state.document.settings.units}
     </div>
   );

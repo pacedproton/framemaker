@@ -27,12 +27,18 @@ function App() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't process shortcuts when editing text
+      if (state.editingFrameId) return;
+
       // Tool shortcuts
-      if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !state.editingFrameId) {
+      if (e.key === 'v' && !e.ctrlKey && !e.metaKey) {
         store.setActiveTool('select');
       }
-      if (e.key === 't' && !e.ctrlKey && !e.metaKey && !state.editingFrameId) {
+      if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
         store.setActiveTool('text');
+      }
+      if (e.key === 'f' && !e.ctrlKey && !e.metaKey) {
+        store.setActiveTool('textFrame');
       }
 
       // Zoom shortcuts
@@ -70,8 +76,8 @@ function App() {
     if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / scale;
-    const y = (e.clientY - rect.top) / scale;
+    const x = (e.clientX - rect.left - 48) / scale; // -48 for pasteboard padding
+    const y = (e.clientY - rect.top - 48) / scale;
 
     setDrawState(startDrawing(drawState, x, y));
   };
@@ -81,8 +87,8 @@ function App() {
     if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / scale;
-    const y = (e.clientY - rect.top) / scale;
+    const x = (e.clientX - rect.left - 48) / scale;
+    const y = (e.clientY - rect.top - 48) / scale;
 
     setDrawState(updateDrawing(drawState, x, y));
   };
@@ -129,25 +135,25 @@ function App() {
         <RulerCorner />
         <Ruler orientation="horizontal" />
 
-        <div className="fm-main-area">
-          <Ruler orientation="vertical" />
+        <Ruler orientation="vertical" />
 
-          <div className="fm-canvas-container">
+        <div className="fm-canvas-container">
+          <div
+            ref={canvasRef}
+            className="fm-canvas"
+            onMouseDown={handleCanvasMouseDown}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+            onMouseLeave={handleCanvasMouseUp}
+          >
             <div
-              className="fm-canvas"
+              className="fm-canvas-scaler"
               style={{
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',
               }}
             >
-              <div
-                ref={canvasRef}
-                className="fm-pasteboard"
-                onMouseDown={handleCanvasMouseDown}
-                onMouseMove={handleCanvasMouseMove}
-                onMouseUp={handleCanvasMouseUp}
-                onMouseLeave={handleCanvasMouseUp}
-              >
+              <div className="fm-pasteboard">
                 <PageRenderer page={currentPage} scale={1} />
 
                 {/* Drawing preview */}
@@ -156,8 +162,8 @@ function App() {
                     className="fm-drawing-preview"
                     style={{
                       position: 'absolute',
-                      left: `${48 + drawingRect.x}px`,
-                      top: `${48 + drawingRect.y}px`,
+                      left: `${drawingRect.x}px`,
+                      top: `${drawingRect.y}px`,
                       width: `${drawingRect.width}px`,
                       height: `${drawingRect.height}px`,
                       border: '2px dashed #2563eb',
