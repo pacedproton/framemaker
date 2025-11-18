@@ -257,6 +257,12 @@ class DocumentStore {
 
     // Update overflow detection
     this.updateTextFrameOverflow(frameId);
+
+    // Trigger reflow if there's overflow and connected frames
+    const frame = this.getTextFrame(frameId);
+    if (frame && frame.overflow && frame.nextFrameId) {
+      this.reflowText(frameId);
+    }
   }
 
   insertParagraph(): void {
@@ -805,6 +811,106 @@ class DocumentStore {
         targetFrame.flowTag = sourceFrame.flowTag;
       }
     }, true);
+
+    // Trigger text reflow
+    this.reflowText(sourceFrameId);
+  }
+
+  // Reflow text from a frame to its connected frames
+  reflowText(frameId: string): void {
+    this.update((state) => {
+      const frame = this.findFrame(state, frameId) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      // Check if frame has overflow and a next frame
+      const formatMap = createFormatMap(state.document.catalog.paragraphFormats);
+      const hasOverflow = detectFrameOverflow(frame, formatMap);
+
+      if (hasOverflow && frame.nextFrameId) {
+        const nextFrame = this.findFrame(state, frame.nextFrameId) as TextFrame | null;
+        if (nextFrame && nextFrame.type === 'text') {
+          // Move overflow paragraphs to next frame
+          const contentHeight = this.calculateFrameContentHeight(frame, formatMap);
+          const availableHeight = frame.height - 12;
+
+          if (contentHeight > availableHeight && frame.paragraphs.length > 1) {
+            // Move last paragraph to next frame
+            const overflowPara = frame.paragraphs.pop();
+            if (overflowPara) {
+              nextFrame.paragraphs.unshift(overflowPara);
+            }
+
+            // Update overflow flags
+            frame.overflow = detectFrameOverflow(frame, formatMap);
+            nextFrame.overflow = detectFrameOverflow(nextFrame, formatMap);
+
+            // Recursively reflow if next frame also overflows
+            if (nextFrame.overflow && nextFrame.nextFrameId) {
+              // Call reflow on next frame (will be processed in next update cycle)
+              setTimeout(() => this.reflowText(nextFrame.id), 0);
+            }
+          }
+        }
+      }
+    });
+  }
+
+  private calculateFrameContentHeight(frame: TextFrame, formatMap: Map<string, import('./types').ParagraphProperties>): number {
+    let totalHeight = 0;
+    const defaultParagraphProperties = {
+      firstIndent: 0,
+      leftIndent: 0,
+      rightIndent: 0,
+      spaceAbove: 0,
+      spaceBelow: 12,
+      lineSpacing: 1.5,
+      alignment: 'left' as const,
+      tabStops: [],
+      defaultFont: {
+        family: 'Times New Roman',
+        size: 12,
+        weight: 'normal' as const,
+        style: 'normal' as const,
+        color: '#000000',
+        underline: false,
+        strikethrough: false,
+        superscript: false,
+        subscript: false,
+        tracking: 0,
+      },
+      keepWithNext: false,
+      keepWithPrevious: false,
+      widowLines: 2,
+      orphanLines: 2,
+    };
+
+    for (let i = 0; i < frame.paragraphs.length; i++) {
+      const para = frame.paragraphs[i];
+      const format = formatMap.get(para.formatTag) || defaultParagraphProperties;
+      const props = para.overrides ? { ...format, ...para.overrides } : format;
+
+      const fontSize = props.defaultFont.size;
+      const lineHeight = fontSize * props.lineSpacing;
+
+      // Calculate total text length
+      let totalChars = 0;
+      for (const elem of para.content) {
+        if ('text' in elem) {
+          totalChars += elem.text.length;
+        }
+      }
+
+      // Estimate number of lines
+      const availableWidth = frame.width - props.leftIndent - props.rightIndent - 12;
+      const avgCharWidth = fontSize * 0.5;
+      const charsPerLine = Math.floor(availableWidth / avgCharWidth);
+      const estimatedLines = Math.max(1, Math.ceil(totalChars / charsPerLine));
+
+      const contentHeight = estimatedLines * lineHeight;
+      totalHeight += props.spaceAbove + contentHeight + props.spaceBelow;
+    }
+
+    return totalHeight;
   }
 
   disconnectFrame(frameId: string): void {
