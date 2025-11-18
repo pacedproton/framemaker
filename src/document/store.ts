@@ -4,6 +4,7 @@ import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline, Ta
 import { createInitialEditorState, createPage, createParagraph, createTextRun, createImageFrame } from './factory';
 import { generateId } from './types';
 import { createTable } from '../engine/TableEngine';
+import { escapeRegex } from '../utils/textSearch';
 
 type Listener = () => void;
 
@@ -518,6 +519,8 @@ class DocumentStore {
     replaceText: string,
     options: { caseSensitive?: boolean; wholeWord?: boolean; frameId?: string } = {}
   ): number {
+    if (!findText) return 0;
+
     let totalReplaced = 0;
 
     this.update((state) => {
@@ -530,27 +533,28 @@ class DocumentStore {
           const textFrame = frame as TextFrame;
           for (const para of textFrame.paragraphs) {
             for (const element of para.content) {
-              if ('text' in element) {
-                const text = element.text as string;
+              if ('text' in element && typeof element.text === 'string') {
+                const text = element.text;
+                const escapedFind = escapeRegex(findText);
+
                 let newText: string;
+                let matches: RegExpMatchArray | null;
 
                 if (options.wholeWord) {
                   const flags = options.caseSensitive ? 'g' : 'gi';
-                  const regex = new RegExp(`\\b${findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, flags);
-                  const matches = text.match(regex);
+                  const regex = new RegExp(`\\b${escapedFind}\\b`, flags);
+                  matches = text.match(regex);
                   if (matches) totalReplaced += matches.length;
                   newText = text.replace(regex, replaceText);
+                } else if (options.caseSensitive) {
+                  const parts = text.split(findText);
+                  totalReplaced += parts.length - 1;
+                  newText = parts.join(replaceText);
                 } else {
-                  if (options.caseSensitive) {
-                    const parts = text.split(findText);
-                    totalReplaced += parts.length - 1;
-                    newText = parts.join(replaceText);
-                  } else {
-                    const regex = new RegExp(findText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-                    const matches = text.match(regex);
-                    if (matches) totalReplaced += matches.length;
-                    newText = text.replace(regex, replaceText);
-                  }
+                  const regex = new RegExp(escapedFind, 'gi');
+                  matches = text.match(regex);
+                  if (matches) totalReplaced += matches.length;
+                  newText = text.replace(regex, replaceText);
                 }
 
                 element.text = newText;

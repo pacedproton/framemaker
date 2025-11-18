@@ -1,6 +1,7 @@
 // Document Statistics Dialog - show word count, character count, etc.
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useStore } from '../document/store';
+import { calculateDocumentStats } from '../utils/documentStats';
 
 interface DocumentStatsDialogProps {
   visible: boolean;
@@ -10,10 +11,10 @@ interface DocumentStatsDialogProps {
 export const DocumentStatsDialog: React.FC<DocumentStatsDialogProps> = ({ visible, onClose }) => {
   const state = useStore();
 
-  if (!visible) return null;
+  // Memoize expensive statistics calculation
+  const stats = useMemo(() => calculateDocumentStats(state), [state]);
 
-  // Calculate statistics
-  const stats = calculateDocumentStats(state);
+  if (!visible) return null;
 
   return (
     <div className="fm-dialog-overlay">
@@ -123,64 +124,3 @@ export const DocumentStatsDialog: React.FC<DocumentStatsDialogProps> = ({ visibl
     </div>
   );
 };
-
-interface DocumentStats {
-  totalFrames: number;
-  textFrames: number;
-  imageFrames: number;
-  totalCharacters: number;
-  charactersNoSpaces: number;
-  totalWords: number;
-  totalParagraphs: number;
-  equations: number;
-  tables: number;
-}
-
-function calculateDocumentStats(state: ReturnType<typeof useStore>): DocumentStats {
-  const stats: DocumentStats = {
-    totalFrames: 0,
-    textFrames: 0,
-    imageFrames: 0,
-    totalCharacters: 0,
-    charactersNoSpaces: 0,
-    totalWords: 0,
-    totalParagraphs: 0,
-    equations: 0,
-    tables: 0,
-  };
-
-  for (const page of state.document.pages) {
-    stats.totalFrames += page.frames.length;
-
-    for (const frame of page.frames) {
-      if (frame.type === 'text') {
-        stats.textFrames++;
-        const textFrame = frame as any;
-
-        for (const para of textFrame.paragraphs) {
-          stats.totalParagraphs++;
-
-          for (const element of para.content) {
-            if ('text' in element) {
-              const text = element.text as string;
-              stats.totalCharacters += text.length;
-              stats.charactersNoSpaces += text.replace(/\s/g, '').length;
-
-              // Count words (split by whitespace)
-              const words = text.trim().split(/\s+/);
-              stats.totalWords += words.filter((w) => w.length > 0).length;
-            } else if (element.type === 'equation') {
-              stats.equations++;
-            } else if (element.type === 'table') {
-              stats.tables++;
-            }
-          }
-        }
-      } else if (frame.type === 'image') {
-        stats.imageFrames++;
-      }
-    }
-  }
-
-  return stats;
-}

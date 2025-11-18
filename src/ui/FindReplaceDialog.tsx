@@ -1,6 +1,7 @@
 // Find/Replace Dialog - search and replace text
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { store, useStore } from '../document/store';
+import { searchDocument } from '../utils/textSearch';
 
 interface FindReplaceDialogProps {
   visible: boolean;
@@ -19,59 +20,27 @@ export const FindReplaceDialog: React.FC<FindReplaceDialogProps> = ({ visible, o
 
   if (!visible) return null;
 
-  const handleFind = () => {
-    if (!findText) {
+  const handleFind = useCallback(() => {
+    if (!findText.trim()) {
       setResults('Please enter text to find.');
       return;
     }
 
-    // Search through all text frames
-    let count = 0;
-    const pages = state.document.pages;
+    const count = searchDocument(state, findText, { caseSensitive, wholeWord });
 
-    for (const page of pages) {
-      for (const frame of page.frames) {
-        if (frame.type === 'text') {
-          const textFrame = frame as any; // TextFrame type
-          for (const para of textFrame.paragraphs) {
-            for (const element of para.content) {
-              if ('text' in element) {
-                const text = element.text as string;
-                const searchText = caseSensitive ? findText : findText.toLowerCase();
-                const targetText = caseSensitive ? text : text.toLowerCase();
+    setResults(
+      count > 0
+        ? `Found ${count} occurrence(s) of "${findText}"`
+        : `"${findText}" not found in document.`
+    );
+  }, [findText, caseSensitive, wholeWord, state]);
 
-                if (wholeWord) {
-                  const regex = new RegExp(`\\b${searchText}\\b`, caseSensitive ? 'g' : 'gi');
-                  const matches = text.match(regex);
-                  count += matches ? matches.length : 0;
-                } else {
-                  let pos = 0;
-                  while ((pos = targetText.indexOf(searchText, pos)) !== -1) {
-                    count++;
-                    pos += searchText.length;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if (count > 0) {
-      setResults(`Found ${count} occurrence(s) of "${findText}"`);
-    } else {
-      setResults(`"${findText}" not found in document.`);
-    }
-  };
-
-  const handleReplace = () => {
-    if (!findText) {
+  const handleReplace = useCallback(() => {
+    if (!findText.trim()) {
       setResults('Please enter text to find.');
       return;
     }
 
-    // Replace in current editing frame only
     if (!state.editingFrameId) {
       setResults('Please click in a text frame first to replace text.');
       return;
@@ -83,15 +52,15 @@ export const FindReplaceDialog: React.FC<FindReplaceDialogProps> = ({ visible, o
       frameId: state.editingFrameId,
     });
 
-    if (replaced > 0) {
-      setResults(`Replaced ${replaced} occurrence(s) in current frame.`);
-    } else {
-      setResults(`"${findText}" not found in current frame.`);
-    }
-  };
+    setResults(
+      replaced > 0
+        ? `Replaced ${replaced} occurrence(s) in current frame.`
+        : `"${findText}" not found in current frame.`
+    );
+  }, [findText, replaceText, caseSensitive, wholeWord, state.editingFrameId]);
 
-  const handleReplaceAll = () => {
-    if (!findText) {
+  const handleReplaceAll = useCallback(() => {
+    if (!findText.trim()) {
       setResults('Please enter text to find.');
       return;
     }
@@ -101,12 +70,12 @@ export const FindReplaceDialog: React.FC<FindReplaceDialogProps> = ({ visible, o
       wholeWord,
     });
 
-    if (totalReplaced > 0) {
-      setResults(`Replaced ${totalReplaced} occurrence(s) in entire document.`);
-    } else {
-      setResults(`"${findText}" not found in document.`);
-    }
-  };
+    setResults(
+      totalReplaced > 0
+        ? `Replaced ${totalReplaced} occurrence(s) in entire document.`
+        : `"${findText}" not found in document.`
+    );
+  }, [findText, replaceText, caseSensitive, wholeWord]);
 
   return (
     <div className="fm-dialog-overlay">
