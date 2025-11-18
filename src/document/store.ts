@@ -5,6 +5,7 @@ import { createInitialEditorState, createPage, createParagraph, createTextRun, c
 import { generateId } from './types';
 import { createTable } from '../engine/TableEngine';
 import { escapeRegex } from '../utils/textSearch';
+import { detectFrameOverflow, createFormatMap } from '../utils/textLayout';
 
 type Listener = () => void;
 
@@ -216,6 +217,7 @@ class DocumentStore {
   insertText(text: string): void {
     if (!this.state.editingFrameId || !this.state.cursor) return;
 
+    const frameId = this.state.editingFrameId;
     this.update((state) => {
       const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
       if (!frame || frame.type !== 'text') return;
@@ -252,6 +254,9 @@ class DocumentStore {
         state.cursor!.offset = text.length;
       }
     }, false);
+
+    // Update overflow detection
+    this.updateTextFrameOverflow(frameId);
   }
 
   insertParagraph(): void {
@@ -313,10 +318,16 @@ class DocumentStore {
         offset: 0,
       };
     }, true);
+
+    // Update overflow detection
+    if (this.state.editingFrameId) {
+      this.updateTextFrameOverflow(this.state.editingFrameId);
+    }
   }
 
   deleteBackward(): void {
     if (!this.state.editingFrameId || !this.state.cursor) return;
+    const frameId = this.state.editingFrameId;
 
     this.update((state) => {
       const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
@@ -363,6 +374,9 @@ class DocumentStore {
         }
       }
     }, false);
+
+    // Update overflow detection
+    this.updateTextFrameOverflow(frameId);
   }
 
   setCursorPosition(paragraphId: string, offset: number): void {
@@ -723,6 +737,134 @@ class DocumentStore {
     this.update((state) => {
       state.showFrameBorders = !state.showFrameBorders;
     });
+  }
+
+  // Text overflow detection
+  updateTextFrameOverflow(frameId: string): void {
+    const frame = this.getTextFrame(frameId);
+    if (!frame) return;
+
+    const formatMap = createFormatMap(this.state.document.catalog.paragraphFormats);
+    const hasOverflow = detectFrameOverflow(frame, formatMap);
+
+    if (frame.overflow !== hasOverflow) {
+      this.update((state) => {
+        const f = this.findFrame(state, frameId);
+        if (f && f.type === 'text') {
+          (f as TextFrame).overflow = hasOverflow;
+        }
+      });
+    }
+  }
+
+  updateAllTextFrameOverflows(): void {
+    this.update((state) => {
+      const formatMap = createFormatMap(state.document.catalog.paragraphFormats);
+      for (const page of state.document.pages) {
+        for (const frame of page.frames) {
+          if (frame.type === 'text') {
+            const textFrame = frame as TextFrame;
+            textFrame.overflow = detectFrameOverflow(textFrame, formatMap);
+          }
+        }
+      }
+    });
+  }
+
+  // Frame threading (text flow between frames)
+  connectFrames(sourceFrameId: string, targetFrameId: string): void {
+    this.update((state) => {
+      const sourceFrame = this.findFrame(state, sourceFrameId) as TextFrame | null;
+      const targetFrame = this.findFrame(state, targetFrameId) as TextFrame | null;
+
+      if (!sourceFrame || sourceFrame.type !== 'text') return;
+      if (!targetFrame || targetFrame.type !== 'text') return;
+
+      // Disconnect source's current next connection if any
+      if (sourceFrame.nextFrameId) {
+        const oldNext = this.findFrame(state, sourceFrame.nextFrameId) as TextFrame | null;
+        if (oldNext && oldNext.type === 'text') {
+          oldNext.prevFrameId = null;
+        }
+      }
+
+      // Disconnect target's current prev connection if any
+      if (targetFrame.prevFrameId) {
+        const oldPrev = this.findFrame(state, targetFrame.prevFrameId) as TextFrame | null;
+        if (oldPrev && oldPrev.type === 'text') {
+          oldPrev.nextFrameId = null;
+        }
+      }
+
+      // Create new connection
+      sourceFrame.nextFrameId = targetFrameId;
+      targetFrame.prevFrameId = sourceFrameId;
+
+      // Update flow tags to match
+      if (sourceFrame.flowTag !== targetFrame.flowTag) {
+        targetFrame.flowTag = sourceFrame.flowTag;
+      }
+    }, true);
+  }
+
+  disconnectFrame(frameId: string): void {
+    this.update((state) => {
+      const frame = this.findFrame(state, frameId) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      // Disconnect from previous frame
+      if (frame.prevFrameId) {
+        const prevFrame = this.findFrame(state, frame.prevFrameId) as TextFrame | null;
+        if (prevFrame && prevFrame.type === 'text') {
+          prevFrame.nextFrameId = frame.nextFrameId;
+        }
+      }
+
+      // Disconnect from next frame
+      if (frame.nextFrameId) {
+        const nextFrame = this.findFrame(state, frame.nextFrameId) as TextFrame | null;
+        if (nextFrame && nextFrame.type === 'text') {
+          nextFrame.prevFrameId = frame.prevFrameId;
+        }
+      }
+
+      frame.prevFrameId = null;
+      frame.nextFrameId = null;
+    }, true);
+  }
+
+  autoconnectFrames(): void {
+    this.update((state) => {
+      // Find all text frames in document order
+      const allTextFrames: TextFrame[] = [];
+      for (const page of state.document.pages) {
+        for (const frame of page.frames) {
+          if (frame.type === 'text') {
+            allTextFrames.push(frame as TextFrame);
+          }
+        }
+      }
+
+      // Connect frames with matching flow tags that have overflow
+      for (let i = 0; i < allTextFrames.length - 1; i++) {
+        const currentFrame = allTextFrames[i];
+        if (currentFrame.overflow && !currentFrame.nextFrameId) {
+          // Find next empty frame with matching flow tag
+          for (let j = i + 1; j < allTextFrames.length; j++) {
+            const nextFrame = allTextFrames[j];
+            if (
+              nextFrame.flowTag === currentFrame.flowTag &&
+              !nextFrame.prevFrameId &&
+              nextFrame.paragraphs.length === 0
+            ) {
+              currentFrame.nextFrameId = nextFrame.id;
+              nextFrame.prevFrameId = currentFrame.id;
+              break;
+            }
+          }
+        }
+      }
+    }, true);
   }
 
   // Undo/Redo

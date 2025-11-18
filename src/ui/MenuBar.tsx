@@ -197,6 +197,32 @@ export const MenuBar: React.FC = () => {
       disabled: true,
     },
     { separator: true },
+    {
+      label: 'Connect Text Frames',
+      action: () => {
+        const frames = prompt('Enter frame IDs separated by comma (source,target):');
+        if (frames) {
+          const [source, target] = frames.split(',').map(s => s.trim());
+          if (source && target) {
+            store.connectFrames(source, target);
+          }
+        }
+      }
+    },
+    {
+      label: 'Disconnect Text Frame',
+      action: () => {
+        const frameId = store.getState().selectedFrameIds[0];
+        if (frameId) {
+          store.disconnectFrame(frameId);
+        }
+      }
+    },
+    {
+      label: 'Autoconnect...',
+      action: () => store.autoconnectFrames()
+    },
+    { separator: true },
     { label: 'Variable...', disabled: true },
     { label: 'Cross-Reference...', disabled: true },
     { separator: true },

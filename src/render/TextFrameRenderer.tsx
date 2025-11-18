@@ -457,6 +457,59 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
         </div>
       )}
 
+      {/* Flow connection indicators */}
+      {isSelected && frame.prevFrameId && (
+        <div
+          className="fm-flow-in-indicator"
+          style={{
+            position: 'absolute',
+            top: -8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 16,
+            height: 16,
+            backgroundColor: '#2563eb',
+            color: 'white',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            border: '2px solid white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+          title="Flows from previous frame"
+        >
+          ↓
+        </div>
+      )}
+
+      {isSelected && frame.nextFrameId && (
+        <div
+          className="fm-flow-out-indicator"
+          style={{
+            position: 'absolute',
+            bottom: -8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 16,
+            height: 16,
+            backgroundColor: '#2563eb',
+            color: 'white',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            border: '2px solid white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          }}
+          title="Flows to next frame"
+        >
+          ↓
+        </div>
+      )}
+
       {/* Resize handles - only show when selected and not editing */}
       {isSelected && !isEditing && (
         <>
