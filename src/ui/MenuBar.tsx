@@ -141,7 +141,11 @@ export const MenuBar: React.FC = () => {
       shortcut: 'Ctrl+D',
       action: () => window.dispatchEvent(new CustomEvent('showCharacterDialog')),
     },
-    { label: 'Paragraphs...', shortcut: 'Ctrl+M', disabled: true },
+    {
+      label: 'Paragraphs...',
+      shortcut: 'Ctrl+M',
+      action: () => window.dispatchEvent(new CustomEvent('showParagraphDesigner')),
+    },
     { separator: true },
     { label: 'Style', disabled: true },
     { separator: true },

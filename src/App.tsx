@@ -15,6 +15,7 @@ import { ImageDialog } from './ui/ImageDialog';
 import { CharacterDialog } from './ui/CharacterDialog';
 import { FindReplaceDialog } from './ui/FindReplaceDialog';
 import { DocumentStatsDialog } from './ui/DocumentStatsDialog';
+import { ParagraphDesigner } from './ui/ParagraphDesigner';
 import {
   createDrawingState,
   startDrawing,
@@ -38,6 +39,7 @@ function App() {
   const [showCharacterDialog, setShowCharacterDialog] = useState(false);
   const [showFindReplaceDialog, setShowFindReplaceDialog] = useState(false);
   const [showDocumentStatsDialog, setShowDocumentStatsDialog] = useState(false);
+  const [showParagraphDesigner, setShowParagraphDesigner] = useState(false);
 
   // Listen for custom events
   useEffect(() => {
@@ -47,12 +49,14 @@ function App() {
     const handleShowCharacterDialog = () => setShowCharacterDialog(true);
     const handleShowFindReplaceDialog = () => setShowFindReplaceDialog(true);
     const handleShowDocumentStatsDialog = () => setShowDocumentStatsDialog(true);
+    const handleShowParagraphDesigner = () => setShowParagraphDesigner(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
     window.addEventListener('showImageDialog', handleShowImageDialog);
     window.addEventListener('showCharacterDialog', handleShowCharacterDialog);
     window.addEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
     window.addEventListener('showDocumentStatsDialog', handleShowDocumentStatsDialog);
+    window.addEventListener('showParagraphDesigner', handleShowParagraphDesigner);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
@@ -60,6 +64,7 @@ function App() {
       window.removeEventListener('showCharacterDialog', handleShowCharacterDialog);
       window.removeEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
       window.removeEventListener('showDocumentStatsDialog', handleShowDocumentStatsDialog);
+      window.removeEventListener('showParagraphDesigner', handleShowParagraphDesigner);
     };
   }, []);
 
@@ -281,6 +286,10 @@ function App() {
       <DocumentStatsDialog
         visible={showDocumentStatsDialog}
         onClose={() => setShowDocumentStatsDialog(false)}
+      />
+      <ParagraphDesigner
+        visible={showParagraphDesigner}
+        onClose={() => setShowParagraphDesigner(false)}
       />
     </div>
   );
