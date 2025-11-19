@@ -1,9 +1,10 @@
 // Page Renderer - renders a single page with all its frames
 import React from 'react';
-import type { Page, Frame, TextFrame, ImageFrame } from '../document/types';
+import type { Page, Frame, TextFrame, ImageFrame, GraphicFrame } from '../document/types';
 import { useStore, store } from '../document/store';
 import { TextFrameRenderer } from './TextFrameRenderer';
 import { ImageFrameRenderer } from './ImageFrameRenderer';
+import { GraphicFrameRenderer } from './GraphicFrameRenderer';
 import { FrameSelectionOverlay } from './FrameSelectionOverlay';
 
 interface PageRendererProps {
@@ -157,6 +158,8 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
         );
       case 'image':
         return <ImageFrameRenderer key={frame.id} frame={frame as ImageFrame} scale={scale} />;
+      case 'graphic':
+        return <GraphicFrameRenderer key={frame.id} frame={frame as GraphicFrame} scale={scale} />;
       default:
         return null;
     }

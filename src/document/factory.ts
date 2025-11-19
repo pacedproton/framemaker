@@ -4,6 +4,8 @@ import type {
   Page,
   TextFrame,
   ImageFrame,
+  GraphicFrame,
+  GraphicObjectType,
   Paragraph,
   TextRun,
   ParagraphFormat,
@@ -96,6 +98,38 @@ export function createImageFrame(
     altText,
     objectFit: 'contain',
     opacity: 1,
+  };
+}
+
+export function createGraphicFrame(
+  pageId: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  graphicType: GraphicObjectType
+): GraphicFrame {
+  return {
+    id: generateId('graphic'),
+    type: 'graphic',
+    pageId,
+    x,
+    y,
+    width,
+    height,
+    rotation: 0,
+    zIndex: 1,
+    locked: false,
+    visible: true,
+    strokeWidth: 1,
+    strokeColor: '#000000',
+    fillColor: 'transparent',
+    graphicType,
+    lineStyle: 'solid',
+    lineWidth: 1,
+    arrowStart: false,
+    arrowEnd: false,
+    cornerRadius: 0,
   };
 }
 

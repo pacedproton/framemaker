@@ -1,7 +1,7 @@
 // Document store - central state management
 import { useState, useEffect } from 'react';
-import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline, TableInline } from './types';
-import { createInitialEditorState, createPage, createParagraph, createTextRun, createImageFrame } from './factory';
+import type { EditorState, Page, Frame, TextFrame, Paragraph, EquationInline, TableInline, GraphicObjectType } from './types';
+import { createInitialEditorState, createPage, createParagraph, createTextRun, createImageFrame, createGraphicFrame } from './factory';
 import { generateId } from './types';
 import { createTable } from '../engine/TableEngine';
 import { escapeRegex } from '../utils/textSearch';
@@ -827,6 +827,25 @@ class DocumentStore {
 
       // Select the new frame
       state.selectedFrameIds = [imageFrame.id];
+    }, true);
+  }
+
+  addGraphicFrame(
+    graphicType: GraphicObjectType,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): void {
+    this.update((state) => {
+      const page = state.document.pages[state.currentPageIndex];
+      if (!page) return;
+
+      const graphicFrame = createGraphicFrame(page.id, x, y, width, height, graphicType);
+      page.frames.push(graphicFrame);
+
+      // Select the new frame
+      state.selectedFrameIds = [graphicFrame.id];
     }, true);
   }
 

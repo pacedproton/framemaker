@@ -143,7 +143,8 @@ function App() {
 
   // Handle mouse events for frame drawing
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
-    if (state.activeTool !== 'textFrame') return;
+    const graphicTools = ['textFrame', 'line', 'rectangle', 'ellipse'];
+    if (!graphicTools.includes(state.activeTool)) return;
     if (!canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
@@ -167,19 +168,46 @@ function App() {
   const handleCanvasMouseUp = () => {
     if (!drawState.isDrawing) return;
 
-    const newFrame = createTextFrameFromDrawing(drawState, currentPage.id);
-    if (newFrame) {
-      // Snap to grid if enabled
-      if (state.document.settings.snapToGrid) {
-        const gridSize = state.document.settings.gridSpacing;
-        newFrame.x = snapToGrid(newFrame.x, gridSize);
-        newFrame.y = snapToGrid(newFrame.y, gridSize);
-        newFrame.width = snapToGrid(newFrame.width, gridSize);
-        newFrame.height = snapToGrid(newFrame.height, gridSize);
-      }
+    const rect = getDrawingRect(drawState);
+    if (!rect || (rect.width < 5 && rect.height < 5)) {
+      setDrawState(endDrawing(drawState));
+      return;
+    }
 
-      store.addTextFrame(newFrame);
-      store.setActiveTool('text');
+    let x = rect.x;
+    let y = rect.y;
+    let width = rect.width;
+    let height = rect.height;
+
+    // Snap to grid if enabled
+    if (state.document.settings.snapToGrid) {
+      const gridSize = state.document.settings.gridSpacing;
+      x = snapToGrid(x, gridSize);
+      y = snapToGrid(y, gridSize);
+      width = snapToGrid(width, gridSize);
+      height = snapToGrid(height, gridSize);
+    }
+
+    // Create appropriate frame based on active tool
+    if (state.activeTool === 'textFrame') {
+      const newFrame = createTextFrameFromDrawing(drawState, currentPage.id);
+      if (newFrame) {
+        newFrame.x = x;
+        newFrame.y = y;
+        newFrame.width = width;
+        newFrame.height = height;
+        store.addTextFrame(newFrame);
+        store.setActiveTool('text');
+      }
+    } else if (state.activeTool === 'line') {
+      store.addGraphicFrame('line', x, y, width, height);
+      store.setActiveTool('select');
+    } else if (state.activeTool === 'rectangle') {
+      store.addGraphicFrame('rectangle', x, y, width, height);
+      store.setActiveTool('select');
+    } else if (state.activeTool === 'ellipse') {
+      store.addGraphicFrame('ellipse', x, y, width, height);
+      store.setActiveTool('select');
     }
 
     setDrawState(endDrawing(drawState));

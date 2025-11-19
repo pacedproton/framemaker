@@ -68,6 +68,27 @@ export const MainToolbar: React.FC = () => {
         >
           [_]
         </button>
+        <button
+          className={`toolbar-btn ${state.activeTool === 'line' ? 'active' : ''}`}
+          onClick={() => store.setActiveTool('line')}
+          title="Draw Line"
+        >
+          /
+        </button>
+        <button
+          className={`toolbar-btn ${state.activeTool === 'rectangle' ? 'active' : ''}`}
+          onClick={() => store.setActiveTool('rectangle')}
+          title="Draw Rectangle"
+        >
+          □
+        </button>
+        <button
+          className={`toolbar-btn ${state.activeTool === 'ellipse' ? 'active' : ''}`}
+          onClick={() => store.setActiveTool('ellipse')}
+          title="Draw Ellipse"
+        >
+          ○
+        </button>
       </div>
 
       <div className="toolbar-divider" />

@@ -113,7 +113,7 @@ export interface Paragraph {
 }
 
 // Frame types
-export type FrameType = 'text' | 'anchored' | 'unanchored' | 'image';
+export type FrameType = 'text' | 'anchored' | 'unanchored' | 'image' | 'graphic';
 
 // Base frame
 export interface BaseFrame {
@@ -183,7 +183,22 @@ export interface ImageFrame extends BaseFrame {
   opacity: number;
 }
 
-export type Frame = TextFrame | AnchoredFrame | UnanchoredFrame | ImageFrame;
+// Graphic object types
+export type GraphicObjectType = 'line' | 'rectangle' | 'ellipse' | 'polygon' | 'polyline';
+
+// Graphic frame (for vector graphics)
+export interface GraphicFrame extends BaseFrame {
+  type: 'graphic';
+  graphicType: GraphicObjectType;
+  points?: { x: number; y: number }[]; // For polygon/polyline
+  lineStyle: 'solid' | 'dashed' | 'dotted';
+  lineWidth: number;
+  arrowStart: boolean;
+  arrowEnd: boolean;
+  cornerRadius: number; // For rounded rectangles
+}
+
+export type Frame = TextFrame | AnchoredFrame | UnanchoredFrame | ImageFrame | GraphicFrame;
 
 // Page
 export interface Page {
@@ -257,7 +272,7 @@ export interface EditorState {
   document: FMDocument;
   currentPageIndex: number;
   selectedFrameIds: string[];
-  activeTool: 'select' | 'text' | 'textFrame' | 'pan';
+  activeTool: 'select' | 'text' | 'textFrame' | 'pan' | 'line' | 'rectangle' | 'ellipse';
 
   // Text editing state
   editingFrameId: string | null;
