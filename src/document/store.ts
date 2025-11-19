@@ -135,6 +135,16 @@ class DocumentStore {
     }, true);
   }
 
+  updateFrameProperty(frameId: string, property: string, value: any): void {
+    this.update((state) => {
+      const frame = this.findFrame(state, frameId);
+      if (frame && !frame.locked) {
+        // Type-safe property update
+        (frame as any)[property] = value;
+      }
+    }, true);
+  }
+
   addTextFrame(frame: Frame): void {
     this.update((state) => {
       const page = state.document.pages[state.currentPageIndex];

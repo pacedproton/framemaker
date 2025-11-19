@@ -71,21 +71,21 @@ export const MainToolbar: React.FC = () => {
         <button
           className={`toolbar-btn ${state.activeTool === 'line' ? 'active' : ''}`}
           onClick={() => store.setActiveTool('line')}
-          title="Draw Line"
+          title="Draw Line (L)"
         >
           /
         </button>
         <button
           className={`toolbar-btn ${state.activeTool === 'rectangle' ? 'active' : ''}`}
           onClick={() => store.setActiveTool('rectangle')}
-          title="Draw Rectangle"
+          title="Draw Rectangle (R)"
         >
           □
         </button>
         <button
           className={`toolbar-btn ${state.activeTool === 'ellipse' ? 'active' : ''}`}
           onClick={() => store.setActiveTool('ellipse')}
-          title="Draw Ellipse"
+          title="Draw Ellipse (E)"
         >
           ○
         </button>

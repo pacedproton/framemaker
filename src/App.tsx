@@ -86,13 +86,28 @@ function App() {
 
       // Tool shortcuts
       if (e.key === 'v' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
         store.setActiveTool('select');
       }
       if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
         store.setActiveTool('text');
       }
       if (e.key === 'f' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
         store.setActiveTool('textFrame');
+      }
+      if (e.key === 'l' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        store.setActiveTool('line');
+      }
+      if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        store.setActiveTool('rectangle');
+      }
+      if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        store.setActiveTool('ellipse');
       }
 
       // Zoom shortcuts

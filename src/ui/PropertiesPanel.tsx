@@ -1,6 +1,7 @@
 // Properties Panel - Document and frame properties
 import React from 'react';
 import { store, useStore } from '../document/store';
+import type { GraphicFrame } from '../document/types';
 
 export const PropertiesPanel: React.FC = () => {
   const state = useStore();
@@ -81,19 +82,79 @@ export const PropertiesPanel: React.FC = () => {
               </div>
             </div>
             <div className="prop-row">
-              <label>Rotation:</label>
+              <label>Z-Index:</label>
               <input
                 type="number"
-                value={selectedFrame.rotation}
+                value={selectedFrame.zIndex}
+                onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'zIndex', parseInt(e.target.value) || 0)}
                 className="prop-input small"
-                readOnly
               />
-              <span>°</span>
+            </div>
+          </div>
+        )}
+
+        {/* Appearance Section */}
+        {selectedFrame && (
+          <div className="prop-section">
+            <div className="prop-section-header">Appearance</div>
+            <div className="prop-row">
+              <label>Stroke Color:</label>
+              <input
+                type="color"
+                value={selectedFrame.strokeColor}
+                onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'strokeColor', e.target.value)}
+                className="prop-color"
+              />
+              <input
+                type="text"
+                value={selectedFrame.strokeColor}
+                onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'strokeColor', e.target.value)}
+                className="prop-input small"
+                placeholder="#000000"
+              />
             </div>
             <div className="prop-row">
-              <label>Locked:</label>
-              <input type="checkbox" checked={selectedFrame.locked} readOnly />
+              <label>Stroke Width:</label>
+              <input
+                type="number"
+                value={selectedFrame.strokeWidth}
+                onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'strokeWidth', parseFloat(e.target.value) || 1)}
+                className="prop-input small"
+                min="0"
+                step="0.5"
+              />
+              <span>pt</span>
             </div>
+            <div className="prop-row">
+              <label>Fill Color:</label>
+              <input
+                type="color"
+                value={selectedFrame.fillColor === 'transparent' ? '#ffffff' : selectedFrame.fillColor}
+                onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'fillColor', e.target.value)}
+                className="prop-color"
+              />
+              <input
+                type="text"
+                value={selectedFrame.fillColor}
+                onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'fillColor', e.target.value)}
+                className="prop-input small"
+                placeholder="transparent"
+              />
+            </div>
+            {selectedFrame.type === 'graphic' && (
+              <div className="prop-row">
+                <label>Line Style:</label>
+                <select
+                  value={(selectedFrame as GraphicFrame).lineStyle}
+                  onChange={(e) => store.updateFrameProperty(selectedFrame.id, 'lineStyle', e.target.value)}
+                  className="prop-select"
+                >
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </div>
+            )}
           </div>
         )}
 
