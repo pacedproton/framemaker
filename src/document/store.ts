@@ -410,15 +410,136 @@ class DocumentStore {
   }
 
   // Character formatting
-  applyCharacterFormat(_tag: string): void {
-    if (!this.state.selection || !this.state.editingFrameId) return;
+  applyCharacterFormat(tag: string): void {
+    if (!this.state.cursor || !this.state.editingFrameId) return;
 
     this.update((state) => {
       const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
       if (!frame || frame.type !== 'text') return;
 
-      // Apply tag to selection - simplified for now
-      // In full implementation, this would split runs and apply the tag
+      const para = frame.paragraphs.find(p => p.id === state.cursor!.paragraphId);
+      if (!para) return;
+
+      // Apply character format to current text run
+      for (const elem of para.content) {
+        if ('text' in elem) {
+          elem.characterTag = tag;
+        }
+      }
+    }, true);
+  }
+
+  // Paragraph formatting catalogs
+  createParagraphFormat(tag: string): void {
+    this.update((state) => {
+      // Check if format already exists
+      if (state.document.catalog.paragraphFormats.find(f => f.tag === tag)) {
+        return;
+      }
+
+      // Create new format based on Body
+      const bodyFormat = state.document.catalog.paragraphFormats.find(f => f.tag === 'Body');
+      const newFormat = {
+        tag,
+        properties: bodyFormat ? { ...bodyFormat.properties } : {
+          firstIndent: 0,
+          leftIndent: 0,
+          rightIndent: 0,
+          spaceAbove: 0,
+          spaceBelow: 12,
+          lineSpacing: 1.5,
+          alignment: 'left' as const,
+          tabStops: [],
+          defaultFont: {
+            family: 'Times New Roman',
+            size: 12,
+            weight: 'normal' as const,
+            style: 'normal' as const,
+            color: '#000000',
+            underline: false,
+            strikethrough: false,
+            superscript: false,
+            subscript: false,
+            tracking: 0,
+          },
+          keepWithNext: false,
+          keepWithPrevious: false,
+          widowLines: 2,
+          orphanLines: 2,
+        },
+      };
+
+      state.document.catalog.paragraphFormats.push(newFormat);
+    }, true);
+  }
+
+  deleteParagraphFormat(tag: string): void {
+    this.update((state) => {
+      if (tag === 'Body') return; // Cannot delete Body format
+
+      const index = state.document.catalog.paragraphFormats.findIndex(f => f.tag === tag);
+      if (index !== -1) {
+        state.document.catalog.paragraphFormats.splice(index, 1);
+
+        // Update all paragraphs using this format to use Body instead
+        for (const page of state.document.pages) {
+          for (const frame of page.frames) {
+            if (frame.type === 'text') {
+              for (const para of (frame as TextFrame).paragraphs) {
+                if (para.formatTag === tag) {
+                  para.formatTag = 'Body';
+                }
+              }
+            }
+          }
+        }
+      }
+    }, true);
+  }
+
+  // Character formatting catalogs
+  createCharacterFormat(tag: string): void {
+    this.update((state) => {
+      // Check if format already exists
+      if (state.document.catalog.characterFormats.find(f => f.tag === tag)) {
+        return;
+      }
+
+      // Create new format with minimal properties
+      const newFormat = {
+        tag,
+        properties: {
+          weight: 'bold' as const,
+        },
+      };
+
+      state.document.catalog.characterFormats.push(newFormat);
+    }, true);
+  }
+
+  deleteCharacterFormat(tag: string): void {
+    this.update((state) => {
+      if (tag === 'Default') return; // Cannot delete Default format
+
+      const index = state.document.catalog.characterFormats.findIndex(f => f.tag === tag);
+      if (index !== -1) {
+        state.document.catalog.characterFormats.splice(index, 1);
+
+        // Remove character tag from all text runs using this format
+        for (const page of state.document.pages) {
+          for (const frame of page.frames) {
+            if (frame.type === 'text') {
+              for (const para of (frame as TextFrame).paragraphs) {
+                for (const elem of para.content) {
+                  if ('characterTag' in elem && elem.characterTag === tag) {
+                    elem.characterTag = undefined;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }, true);
   }
 

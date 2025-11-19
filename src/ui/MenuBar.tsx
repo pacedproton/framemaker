@@ -147,6 +147,17 @@ export const MenuBar: React.FC = () => {
       action: () => window.dispatchEvent(new CustomEvent('showParagraphDesigner')),
     },
     { separator: true },
+    {
+      label: 'Paragraph Catalog',
+      shortcut: 'Ctrl+9',
+      action: () => window.dispatchEvent(new CustomEvent('toggleParagraphCatalog')),
+    },
+    {
+      label: 'Character Catalog',
+      shortcut: 'Ctrl+8',
+      action: () => window.dispatchEvent(new CustomEvent('toggleCharacterCatalog')),
+    },
+    { separator: true },
     { label: 'Style', disabled: true },
     { separator: true },
     {

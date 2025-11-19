@@ -16,6 +16,8 @@ import { CharacterDialog } from './ui/CharacterDialog';
 import { FindReplaceDialog } from './ui/FindReplaceDialog';
 import { DocumentStatsDialog } from './ui/DocumentStatsDialog';
 import { ParagraphDesigner } from './ui/ParagraphDesigner';
+import { ParagraphCatalog } from './ui/ParagraphCatalog';
+import { CharacterCatalog } from './ui/CharacterCatalog';
 import {
   createDrawingState,
   startDrawing,
@@ -40,6 +42,8 @@ function App() {
   const [showFindReplaceDialog, setShowFindReplaceDialog] = useState(false);
   const [showDocumentStatsDialog, setShowDocumentStatsDialog] = useState(false);
   const [showParagraphDesigner, setShowParagraphDesigner] = useState(false);
+  const [showParagraphCatalog, setShowParagraphCatalog] = useState(false);
+  const [showCharacterCatalog, setShowCharacterCatalog] = useState(false);
 
   // Listen for custom events
   useEffect(() => {
@@ -50,6 +54,8 @@ function App() {
     const handleShowFindReplaceDialog = () => setShowFindReplaceDialog(true);
     const handleShowDocumentStatsDialog = () => setShowDocumentStatsDialog(true);
     const handleShowParagraphDesigner = () => setShowParagraphDesigner(true);
+    const handleToggleParagraphCatalog = () => setShowParagraphCatalog((v) => !v);
+    const handleToggleCharacterCatalog = () => setShowCharacterCatalog((v) => !v);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
     window.addEventListener('showImageDialog', handleShowImageDialog);
@@ -57,6 +63,8 @@ function App() {
     window.addEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
     window.addEventListener('showDocumentStatsDialog', handleShowDocumentStatsDialog);
     window.addEventListener('showParagraphDesigner', handleShowParagraphDesigner);
+    window.addEventListener('toggleParagraphCatalog', handleToggleParagraphCatalog);
+    window.addEventListener('toggleCharacterCatalog', handleToggleCharacterCatalog);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
@@ -65,6 +73,8 @@ function App() {
       window.removeEventListener('showFindReplaceDialog', handleShowFindReplaceDialog);
       window.removeEventListener('showDocumentStatsDialog', handleShowDocumentStatsDialog);
       window.removeEventListener('showParagraphDesigner', handleShowParagraphDesigner);
+      window.removeEventListener('toggleParagraphCatalog', handleToggleParagraphCatalog);
+      window.removeEventListener('toggleCharacterCatalog', handleToggleCharacterCatalog);
     };
   }, []);
 
@@ -290,6 +300,14 @@ function App() {
       <ParagraphDesigner
         visible={showParagraphDesigner}
         onClose={() => setShowParagraphDesigner(false)}
+      />
+      <ParagraphCatalog
+        visible={showParagraphCatalog}
+        onClose={() => setShowParagraphCatalog(false)}
+      />
+      <CharacterCatalog
+        visible={showCharacterCatalog}
+        onClose={() => setShowCharacterCatalog(false)}
       />
     </div>
   );
