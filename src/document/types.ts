@@ -144,6 +144,15 @@ export interface Paragraph {
 // Frame types
 export type FrameType = 'text' | 'anchored' | 'unanchored' | 'image' | 'graphic';
 
+// Runaround types
+export type RunaroundType = 'none' | 'bothSides' | 'leftSide' | 'rightSide' | 'runInto';
+
+// Runaround properties
+export interface RunaroundProperties {
+  type: RunaroundType;
+  gap: number; // Gap between text and frame in points
+}
+
 // Base frame
 export interface BaseFrame {
   id: string;
@@ -160,6 +169,7 @@ export interface BaseFrame {
   strokeWidth: number;
   strokeColor: string;
   fillColor: string;
+  runaround: RunaroundProperties;
 }
 
 // Text frame

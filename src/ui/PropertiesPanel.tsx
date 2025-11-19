@@ -158,6 +158,47 @@ export const PropertiesPanel: React.FC = () => {
           </div>
         )}
 
+        {/* Runaround Properties */}
+        {selectedFrame && selectedFrame.type !== 'text' && (
+          <div className="prop-section">
+            <div className="prop-section-header">Text Runaround</div>
+            <div className="prop-row">
+              <label>Type:</label>
+              <select
+                value={selectedFrame.runaround.type}
+                onChange={(e) => store.updateFrameProperty(
+                  selectedFrame.id,
+                  'runaround',
+                  { ...selectedFrame.runaround, type: e.target.value }
+                )}
+                className="prop-select"
+              >
+                <option value="none">None</option>
+                <option value="bothSides">Both Sides</option>
+                <option value="leftSide">Left Side Only</option>
+                <option value="rightSide">Right Side Only</option>
+                <option value="runInto">Run Into Frame</option>
+              </select>
+            </div>
+            <div className="prop-row">
+              <label>Gap:</label>
+              <input
+                type="number"
+                value={selectedFrame.runaround.gap}
+                onChange={(e) => store.updateFrameProperty(
+                  selectedFrame.id,
+                  'runaround',
+                  { ...selectedFrame.runaround, gap: parseFloat(e.target.value) || 0 }
+                )}
+                className="prop-input small"
+                min="0"
+                step="1"
+              />
+              <span>pt</span>
+            </div>
+          </div>
+        )}
+
         {/* View Settings */}
         <div className="prop-section">
           <div className="prop-section-header">View</div>

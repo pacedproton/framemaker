@@ -87,6 +87,7 @@ export function createTextFrameFromDrawing(
     strokeWidth: 1,
     strokeColor: '#000000',
     fillColor: 'transparent',
+    runaround: { type: 'none', gap: 12 },
     flowTag,
     columns: 1,
     columnGap: 12,
