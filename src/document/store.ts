@@ -1123,6 +1123,133 @@ class DocumentStore {
     }, true);
   }
 
+  // Master Pages
+  createMasterPage(name: string, pageType: 'left' | 'right' | 'single'): void {
+    this.update((state) => {
+      // Check if master page with this name already exists
+      if (state.document.masterPages.find(mp => mp.name === name)) {
+        return;
+      }
+
+      const masterPage = {
+        id: generateId('master'),
+        name,
+        pageType,
+        templateFrames: [],
+        backgroundFrames: [],
+      };
+
+      state.document.masterPages.push(masterPage);
+    }, true);
+  }
+
+  deleteMasterPage(masterPageId: string): void {
+    this.update((state) => {
+      const index = state.document.masterPages.findIndex(mp => mp.id === masterPageId);
+      if (index !== -1) {
+        state.document.masterPages.splice(index, 1);
+
+        // Update pages using this master page to use null
+        for (const page of state.document.pages) {
+          if (page.masterPageId === masterPageId) {
+            page.masterPageId = null;
+          }
+        }
+      }
+    }, true);
+  }
+
+  applyMasterPageToPage(pageIndex: number, masterPageId: string | null): void {
+    this.update((state) => {
+      const page = state.document.pages[pageIndex];
+      if (page) {
+        page.masterPageId = masterPageId;
+      }
+    }, true);
+  }
+
+  getMasterPage(masterPageId: string) {
+    return this.state.document.masterPages.find(mp => mp.id === masterPageId);
+  }
+
+  // Variables
+  insertVariable(variableName: string): void {
+    if (!this.state.editingFrameId || !this.state.cursor) return;
+
+    this.update((state) => {
+      const frame = this.findFrame(state, state.editingFrameId!) as TextFrame | null;
+      if (!frame || frame.type !== 'text') return;
+
+      const para = frame.paragraphs.find((p) => p.id === state.cursor!.paragraphId);
+      if (!para) return;
+
+      // Create variable inline element
+      const varElement: import('./types').VariableInline = {
+        type: 'variable',
+        id: generateId('var'),
+        variableName,
+      };
+
+      // Insert at cursor position
+      let currentOffset = 0;
+      for (let i = 0; i < para.content.length; i++) {
+        const elem = para.content[i];
+        if ('text' in elem) {
+          const runLength = elem.text.length;
+          if (currentOffset + runLength >= state.cursor!.offset) {
+            // Split text run and insert variable
+            const insertPos = state.cursor!.offset - currentOffset;
+            const beforeText = elem.text.slice(0, insertPos);
+            const afterText = elem.text.slice(insertPos);
+
+            const newElements = [];
+            if (beforeText) {
+              newElements.push(createTextRun(beforeText));
+            }
+            newElements.push(varElement);
+            if (afterText) {
+              newElements.push(createTextRun(afterText));
+            }
+
+            para.content.splice(i, 1, ...newElements);
+            state.cursor!.offset += 1; // Variable counts as 1 position
+            return;
+          }
+          currentOffset += runLength;
+        }
+      }
+
+      // Cursor is at end, append variable
+      para.content.push(varElement);
+      state.cursor!.offset += 1;
+    }, true);
+  }
+
+  createVariable(name: string, type: import('./types').VariableType, format?: string, customValue?: string): void {
+    this.update((state) => {
+      // Check if variable already exists
+      if (state.document.variables.find(v => v.name === name)) {
+        return;
+      }
+
+      state.document.variables.push({
+        name,
+        type,
+        format,
+        customValue,
+      });
+    }, true);
+  }
+
+  deleteVariable(name: string): void {
+    this.update((state) => {
+      const index = state.document.variables.findIndex(v => v.name === name);
+      if (index !== -1) {
+        state.document.variables.splice(index, 1);
+      }
+    }, true);
+  }
+
   // Undo/Redo
   undo(): void {
     if (this.undoStack.length === 0) return;

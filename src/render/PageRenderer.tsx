@@ -115,6 +115,11 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
     );
   };
 
+  // Get master page if assigned
+  const masterPage = page.masterPageId
+    ? state.document.masterPages.find(mp => mp.id === page.masterPageId)
+    : null;
+
   // Render frames
   const renderFrame = (frame: Frame) => {
     switch (frame.type) {
@@ -181,6 +186,21 @@ export const PageRenderer: React.FC<PageRendererProps> = ({ page, scale }) => {
       {renderGrid()}
       {renderMargins()}
 
+      {/* Master page background frames (non-editable) */}
+      {masterPage?.backgroundFrames.map((frame) => (
+        <div key={`master-${frame.id}`} style={{ pointerEvents: 'none', opacity: 0.7 }}>
+          {renderFrame(frame)}
+        </div>
+      ))}
+
+      {/* Master page template frames (non-editable) */}
+      {masterPage?.templateFrames.map((frame) => (
+        <div key={`master-template-${frame.id}`} style={{ pointerEvents: 'none', opacity: 0.7 }}>
+          {renderFrame(frame)}
+        </div>
+      ))}
+
+      {/* Regular page frames */}
       {sortedFrames.map(renderFrame)}
 
       {/* Selection overlays */}

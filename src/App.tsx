@@ -18,6 +18,8 @@ import { DocumentStatsDialog } from './ui/DocumentStatsDialog';
 import { ParagraphDesigner } from './ui/ParagraphDesigner';
 import { ParagraphCatalog } from './ui/ParagraphCatalog';
 import { CharacterCatalog } from './ui/CharacterCatalog';
+import { MasterPagesPanel } from './ui/MasterPagesPanel';
+import { VariablesDialog } from './ui/VariablesDialog';
 import {
   createDrawingState,
   startDrawing,
@@ -44,6 +46,8 @@ function App() {
   const [showParagraphDesigner, setShowParagraphDesigner] = useState(false);
   const [showParagraphCatalog, setShowParagraphCatalog] = useState(false);
   const [showCharacterCatalog, setShowCharacterCatalog] = useState(false);
+  const [showMasterPagesPanel, setShowMasterPagesPanel] = useState(false);
+  const [showVariablesDialog, setShowVariablesDialog] = useState(false);
 
   // Listen for custom events
   useEffect(() => {
@@ -56,6 +60,8 @@ function App() {
     const handleShowParagraphDesigner = () => setShowParagraphDesigner(true);
     const handleToggleParagraphCatalog = () => setShowParagraphCatalog((v) => !v);
     const handleToggleCharacterCatalog = () => setShowCharacterCatalog((v) => !v);
+    const handleToggleMasterPagesPanel = () => setShowMasterPagesPanel((v) => !v);
+    const handleShowVariablesDialog = () => setShowVariablesDialog(true);
     window.addEventListener('toggleToolPalette', handleToggleToolPalette);
     window.addEventListener('showTableDialog', handleShowTableDialog);
     window.addEventListener('showImageDialog', handleShowImageDialog);
@@ -65,6 +71,8 @@ function App() {
     window.addEventListener('showParagraphDesigner', handleShowParagraphDesigner);
     window.addEventListener('toggleParagraphCatalog', handleToggleParagraphCatalog);
     window.addEventListener('toggleCharacterCatalog', handleToggleCharacterCatalog);
+    window.addEventListener('toggleMasterPagesPanel', handleToggleMasterPagesPanel);
+    window.addEventListener('showVariablesDialog', handleShowVariablesDialog);
     return () => {
       window.removeEventListener('toggleToolPalette', handleToggleToolPalette);
       window.removeEventListener('showTableDialog', handleShowTableDialog);
@@ -75,6 +83,8 @@ function App() {
       window.removeEventListener('showParagraphDesigner', handleShowParagraphDesigner);
       window.removeEventListener('toggleParagraphCatalog', handleToggleParagraphCatalog);
       window.removeEventListener('toggleCharacterCatalog', handleToggleCharacterCatalog);
+      window.removeEventListener('toggleMasterPagesPanel', handleToggleMasterPagesPanel);
+      window.removeEventListener('showVariablesDialog', handleShowVariablesDialog);
     };
   }, []);
 
@@ -351,6 +361,14 @@ function App() {
       <CharacterCatalog
         visible={showCharacterCatalog}
         onClose={() => setShowCharacterCatalog(false)}
+      />
+      <MasterPagesPanel
+        visible={showMasterPagesPanel}
+        onClose={() => setShowMasterPagesPanel(false)}
+      />
+      <VariablesDialog
+        visible={showVariablesDialog}
+        onClose={() => setShowVariablesDialog(false)}
       />
     </div>
   );

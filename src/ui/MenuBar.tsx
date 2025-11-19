@@ -158,6 +158,12 @@ export const MenuBar: React.FC = () => {
       action: () => window.dispatchEvent(new CustomEvent('toggleCharacterCatalog')),
     },
     { separator: true },
+    {
+      label: 'Master Pages...',
+      shortcut: 'Ctrl+Shift+M',
+      action: () => window.dispatchEvent(new CustomEvent('toggleMasterPagesPanel')),
+    },
+    { separator: true },
     { label: 'Style', disabled: true },
     { separator: true },
     {
@@ -234,7 +240,10 @@ export const MenuBar: React.FC = () => {
       action: () => store.autoconnectFrames()
     },
     { separator: true },
-    { label: 'Variable...', disabled: true },
+    {
+      label: 'Variable...',
+      action: () => window.dispatchEvent(new CustomEvent('showVariablesDialog'))
+    },
     { label: 'Cross-Reference...', disabled: true },
     { separator: true },
     { label: 'Marker...', disabled: true },

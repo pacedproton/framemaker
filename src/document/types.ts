@@ -101,8 +101,37 @@ export interface TableInline {
   tableData: string; // JSON serialized table structure
 }
 
+// Variable types
+export type VariableType =
+  | 'currentPageNumber'
+  | 'pageCount'
+  | 'chapterNumber'
+  | 'chapterTitle'
+  | 'runningHeader'
+  | 'runningFooter'
+  | 'creationDate'
+  | 'modificationDate'
+  | 'filename'
+  | 'author'
+  | 'custom';
+
+// Variable definition
+export interface VariableDefinition {
+  name: string;
+  type: VariableType;
+  format?: string; // For date formatting, number formatting, etc.
+  customValue?: string; // For custom variables
+}
+
+// Variable inline element (reference to a variable)
+export interface VariableInline {
+  type: 'variable';
+  id: string;
+  variableName: string;
+}
+
 // Inline element
-export type InlineElement = TextRun | AnchorMarker | EquationInline | TableInline;
+export type InlineElement = TextRun | AnchorMarker | EquationInline | TableInline | VariableInline;
 
 // Paragraph
 export interface Paragraph {
@@ -265,6 +294,8 @@ export interface FMDocument {
     paragraphFormats: ParagraphFormat[];
     characterFormats: CharacterFormat[];
   };
+
+  variables: VariableDefinition[];
 }
 
 // Editor state

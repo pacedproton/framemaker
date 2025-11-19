@@ -256,6 +256,47 @@ export function createDefaultCharacterFormats(): CharacterFormat[] {
   ];
 }
 
+export function createDefaultVariables(): import('./types').VariableDefinition[] {
+  return [
+    {
+      name: 'Current Page #',
+      type: 'currentPageNumber',
+      format: 'numeric',
+    },
+    {
+      name: 'Page Count',
+      type: 'pageCount',
+      format: 'numeric',
+    },
+    {
+      name: 'Creation Date',
+      type: 'creationDate',
+      format: 'MM/DD/YYYY',
+    },
+    {
+      name: 'Modification Date',
+      type: 'modificationDate',
+      format: 'MM/DD/YYYY',
+    },
+    {
+      name: 'Filename',
+      type: 'filename',
+    },
+    {
+      name: 'Author',
+      type: 'author',
+    },
+    {
+      name: 'Running H/F 1',
+      type: 'runningHeader',
+    },
+    {
+      name: 'Running H/F 2',
+      type: 'runningFooter',
+    },
+  ];
+}
+
 export function createDocument(name: string = 'Untitled'): FMDocument {
   const doc: FMDocument = {
     id: generateId('doc'),
@@ -301,6 +342,8 @@ export function createDocument(name: string = 'Untitled'): FMDocument {
       paragraphFormats: createDefaultParagraphFormats(),
       characterFormats: createDefaultCharacterFormats(),
     },
+
+    variables: createDefaultVariables(),
   };
 
   // Register frame in flow

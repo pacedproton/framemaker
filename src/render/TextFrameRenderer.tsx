@@ -7,6 +7,7 @@ import { parseSimpleEquation } from '../engine/EquationEditor';
 import { EquationRenderer } from './EquationRenderer';
 import { TableRenderer } from './TableRenderer';
 import type { Table } from '../engine/TableEngine';
+import { resolveVariableValue } from '../utils/variableResolver';
 
 interface TextFrameRendererProps {
   frame: TextFrame;
@@ -343,6 +344,32 @@ export const TextFrameRenderer: React.FC<TextFrameRendererProps> = ({ frame, sca
             </span>
           );
         }
+      }
+
+      // Render variable inline
+      if ('type' in elem && elem.type === 'variable') {
+        const variable = state.document.variables.find(v => v.name === elem.variableName);
+        const variableValue = variable
+          ? resolveVariableValue(variable, state.document, state.currentPageIndex)
+          : '[Variable Not Found]';
+
+        return (
+          <span
+            key={elem.id}
+            className="fm-variable-inline"
+            style={{
+              display: 'inline',
+              padding: '0 2px',
+              background: 'rgba(34, 197, 94, 0.1)',
+              borderRadius: '2px',
+              fontStyle: 'italic',
+              color: '#059669',
+            }}
+            title={`Variable: ${elem.variableName}`}
+          >
+            {variableValue}
+          </span>
+        );
       }
 
       return null;
